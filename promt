@@ -1,702 +1,424 @@
-# NEPTUNE ADMIN FRONTEND — ADD RIDER VEHICLE ASSIGNMENT ONLY
+# ADDITIONAL ADMIN FRONTEND REQUIREMENTS — CRUD + REPORTS
 
-You are working inside the existing NEPTUNE Admin Dashboard frontend.
+These are ADDITIONAL requirements for the existing NEPTUNE Admin Dashboard.
 
-The Admin Dashboard is already working correctly with the backend.
+The Admin Dashboard is already working.
 
-I need ONE new feature:
+Do NOT redesign the application.
 
-## WHEN CREATING OR EDITING A RIDER, ADMIN MUST BE ABLE TO ASSIGN AN EXISTING VEHICLE
+Do NOT break existing functionality.
+
+---
+
+# 1. COMPLETE CRUD OPERATIONS
+
+Audit every Admin management section and make sure the UI supports the CRUD operations actually available from the backend.
+
+Check:
+
+* Collectors
+* Riders
+* Vehicles
+* Daily Assignments
+* Collection Requests
+* Collections/Collection Records where Admin management is supported
+
+For each section verify:
+
+* list
+* details where applicable
+* create where applicable
+* edit where applicable
+* delete where applicable
+* activate/deactivate where applicable
+
+Do NOT create fake CRUD operations.
+
+Do NOT show a Delete/Edit button if the backend does not support the operation.
+
+Do not invent API endpoints.
+
+Use the actual backend API.
+
+---
+
+# 2. REPORTS SIDEBAR SECTION
+
+Add a new item to the Admin Dashboard sidebar:
+
+## Reports
 
 Example:
 
-Existing Vehicles:
-
-* Tuk 1
-* Tuk 2
-* Bike 1
-
-Rider form:
-
 ```text
-Full Name: Sahan
-NIC: ...
-Mobile: ...
-Address: ...
-
-Assigned Vehicle:
-[ Tuk 1 ▼ ]
+Dashboard
+Collectors
+Riders
+Vehicles
+Assignments
+Collection Requests
+Reports
 ```
 
-The selected vehicle must be saved to the backend as the Rider's assigned vehicle.
+Use the existing Neptune sidebar design.
+
+Do not redesign the sidebar.
 
 ---
 
-# 🚨 CRITICAL RULE
+# 3. REPORTS PAGE
 
-DO NOT CHANGE ANYTHING ELSE.
+Create a dedicated Reports page.
 
-The current Admin Dashboard is already working.
+The page should allow Admin to select a report type.
 
-Do not refactor unrelated pages.
+Example:
 
-Do not redesign the dashboard.
+```text
+Reports
 
-Do not modify working Collector functionality.
+[ Collection Report ▼ ]
 
-Do not modify Vehicle CRUD except where absolutely necessary to support the dropdown.
+Date From: [       ]
+Date To:   [       ]
 
-Do not modify Assignments.
+Collector: [ All ▼ ]
+Rider:     [ All ▼ ]
+Vehicle:   [ All ▼ ]
+Status:    [ All ▼ ]
 
-Do not modify Collection Requests.
+[ Generate Report ]
+```
 
-Do not modify Dashboard statistics.
+Only show filters relevant to the selected report.
 
-Do not modify Leaderboard.
-
-Do not modify authentication.
-
-Do not modify Settings.
-
-Do not add unrelated features.
-
-This is a targeted Rider → Vehicle assignment feature.
+Do not invent filters for nonexistent backend fields.
 
 ---
 
-# 🚨 DO NOT TOUCH QR
+# 4. REPORT TYPES
 
-The QR functionality is unrelated to this feature.
+Provide report options based on actual Neptune data:
 
-DO NOT modify:
+* Collection Report
+* Collection Request Report
+* Collector Report
+* Rider Report
+* Vehicle Report
+* Assignment Report
 
-* QR UI
-* QR fields
-* Collector QR
-* QR display
-* QR generation
+The report data must come from the backend.
+
+Do NOT use mock data.
+
+Do NOT hardcode report numbers.
+
+---
+
+# 5. COLLECTION REPORT
+
+Display real information such as:
+
+* Collection ID
+* Request ID
+* Collector
+* Rider
+* Vehicle
+* Weight (kg)
+* Collection date/time
+
+Use actual backend response fields.
+
+---
+
+# 6. COLLECTION REQUEST REPORT
+
+Display:
+
+* Request ID
+* Collector
+* Rider
+* Status
 * QR verification
-* Rider QR scanning
-* QR-related API calls
+* Latitude
+* Longitude
+* Requested time
+* Accepted time
+* Completed time
+* Cancelled time
 
-Leave all QR functionality exactly as it currently works.
-
----
-
-# 🚨 DO NOT TOUCH FLUTTER
-
-This is the Admin frontend.
-
-Do not modify Flutter code.
-
-Do not create mobile UI.
-
-Do not change mobile API assumptions.
-
-The separate Flutter Collector/Rider applications are outside the scope of this task.
+Only show fields returned by the backend.
 
 ---
 
-# STEP 1 — INSPECT EXISTING ADMIN FRONTEND
+# 7. COLLECTOR REPORT
 
-Before editing:
+Display useful real Collector information and relevant activity.
 
-1. Inspect Rider types.
-2. Inspect Rider form/modal.
-3. Inspect Rider create API call.
-4. Inspect Rider update API call.
-5. Inspect Vehicle types.
-6. Inspect Vehicle API service.
-7. Inspect existing Vehicle list endpoint.
-8. Inspect authentication/API client.
-9. Inspect existing validation.
-10. Inspect existing UI patterns.
+Do not display nonexistent fields such as:
 
-Do not rewrite working components.
-
----
-
-# STEP 2 — ADD VEHICLE TO RIDER TYPE
-
-The Rider frontend model should support the new backend relationship.
-
-Add:
-
-```text
-vehicleId
-vehicle
-```
-
-where appropriate.
-
-The exact TypeScript type should match the updated backend response.
-
-Example:
-
-```text
-vehicleId: string | null
-```
-
-and optionally:
-
-```text
-vehicle?: {
-  id: string
-  vehicleCode: string
-  vehicleType: string
-  status: string
-} | null
-```
-
-Do not use `any`.
-
-Do not use `@ts-ignore`.
-
-Do not hide type errors.
-
----
-
-# STEP 3 — VEHICLE DROPDOWN
-
-In the Rider Create/Edit form, add:
-
-```text
-Assigned Vehicle
-```
-
-as a dropdown/select.
-
-When the form opens:
-
-Call the existing Admin Vehicle endpoint:
-
-```text
-GET /admin/vehicles
-```
-
-Do NOT create another backend endpoint if the existing endpoint already provides the required data.
-
----
-
-# STEP 4 — ONLY SHOW ACTIVE VEHICLES FOR NEW ASSIGNMENT
-
-The dropdown should show vehicles that are currently ACTIVE.
-
-Example:
-
-```text
-Assigned Vehicle
-----------------
-Tuk 1
-Tuk 2
-Bike 1
-```
-
-Do not show inactive vehicles as selectable options for a new assignment.
-
-Use the real backend `status`.
-
-Do not hardcode the vehicle list.
-
-Do not use mock vehicle data.
-
----
-
-# STEP 5 — DISPLAY VEHICLE CODE
-
-The vehicle dropdown should primarily display:
-
-```text
-vehicleCode
-```
-
-Examples:
-
-* Tuk 1
-* Tuk 2
-* Bike 1
-
-Vehicle type can optionally be displayed for clarity:
-
-```text
-Tuk 1 — Tuk
-Tuk 2 — Tuk
-Bike 1 — Bike
-```
-
-Do not add number plate fields.
-
-The system does NOT require number plates.
-
----
-
-# STEP 6 — CREATE RIDER
-
-When creating a Rider, send the selected:
-
-```text
-vehicleId
-```
-
-to the backend.
-
-The Rider create payload must remain the existing correct payload plus:
-
-```text
-vehicleId
-```
-
-Do not send unrelated fields.
-
-Do NOT send:
-
-* vehicleNumber
-* vehicleColour
 * area
 * lastLogin
-* assignmentId
-* fake vehicle fields
 
-Only the actual backend-supported `vehicleId` should be added.
+unless the backend actually provides them.
 
 ---
 
-# STEP 7 — EDIT RIDER
+# 8. RIDER REPORT
 
-When editing an existing Rider:
+Display:
 
-If the Rider already has:
+* Rider
+* contact information
+* assigned vehicle where available
+* collection activity
 
-```text
-vehicleId
-```
+Use the new Rider → Vehicle relationship from the backend.
 
-the dropdown must automatically show the currently assigned vehicle.
+Do not invent vehicle data.
+
+---
+
+# 9. VEHICLE REPORT
+
+Display:
+
+* vehicle code
+* vehicle type
+* status
+* relevant collection information
+
+Example vehicle codes:
+
+* Tuk 1
+* Tuk 2
+* Bike 1
+
+No number plate functionality.
+
+---
+
+# 10. ASSIGNMENT REPORT
+
+Display real:
+
+* Assignment ID
+* Collector
+* Assignment Date
+* Created date
+* Updated date
+
+Do NOT display:
+
+* area
+* fake assignment status
+* fake requestIds
+
+unless actually returned by the backend.
+
+---
+
+# 11. FILTERS
+
+Use real backend filtering.
+
+Where supported:
+
+* Date From
+* Date To
+* Collector
+* Rider
+* Vehicle
+* Status
+
+Do not hardcode dates.
+
+Do not use fake filtering on data already loaded if the dataset could be large.
+
+Prefer backend filtering when the API supports it.
+
+---
+
+# 12. GENERATE REPORT QUICK ACCESS
+
+Add a Reports quick-access card/button to the main Dashboard.
 
 Example:
 
 ```text
-Assigned Vehicle
-[ Tuk 1 ▼ ]
+Quick Access
+
+┌─────────────────────┐
+│  📊 Generate Report │
+│  View system reports│
+└─────────────────────┘
 ```
 
-Admin must be able to change it:
+Clicking it should navigate directly to the Reports page.
 
-```text
-Tuk 1
-↓
-Tuk 2
-```
+Use the existing Dashboard visual style.
 
-Then save the Rider.
-
-The new vehicle assignment must persist to the backend/database.
+Do not redesign the Dashboard.
 
 ---
 
-# STEP 8 — REMOVE VEHICLE ASSIGNMENT
+# 13. REPORT EMPTY STATE
 
-If the backend supports nullable vehicleId, provide a clean option such as:
-
-```text
-No Vehicle Assigned
-```
-
-This should set:
-
-```text
-vehicleId = null
-```
-
-Do not invent a fake vehicle ID.
-
-If the current backend does not support clearing the assignment, do not fake it. Report that backend support is required.
-
----
-
-# STEP 9 — HANDLE VEHICLE ALREADY ASSIGNED
-
-The backend should prevent two Riders from being assigned to the same vehicle.
-
-If the API returns:
-
-```text
-409 Conflict
-```
-
-show a clear Admin message such as:
-
-```text
-This vehicle is already assigned to another rider.
-```
-
-Do not silently overwrite another Rider's assignment.
-
-Do not retry automatically.
-
----
-
-# STEP 10 — VEHICLE STATUS
-
-Only ACTIVE vehicles should normally appear in the assignment dropdown.
-
-However, if an existing Rider is already assigned to a vehicle that has since become inactive, do not silently remove that assignment.
-
-For an existing Rider, the UI may display the currently assigned inactive vehicle as the current value so the Admin understands the existing state.
-
-When changing the assignment, only ACTIVE vehicles should be selectable.
-
-Do not automatically modify vehicle status.
-
----
-
-# STEP 11 — RIDER LIST
-
-Update the Rider list to show the assigned vehicle where appropriate.
-
-Example:
-
-```text
-Rider        Mobile       Assigned Vehicle
-Sahan        07XXXXXXXX   Tuk 1
-Kamal        07XXXXXXXX   Bike 1
-```
-
-If no vehicle is assigned:
-
-```text
-No Vehicle
-```
-
-Use actual backend data.
-
-Do not display fake vehicle information.
-
----
-
-# STEP 12 — RIDER DETAILS
-
-If the Admin Dashboard has a Rider details page/modal, display:
-
-```text
-Assigned Vehicle
-Tuk 1
-```
-
-using the real backend relation.
-
-Do not invent a vehicle assignment.
-
----
-
-# STEP 13 — DO NOT CHANGE VEHICLE CRUD
-
-The existing Vehicle section is already working.
-
-Keep it working.
-
-Admin should still be able to:
-
-* create vehicle
-* edit vehicle
-* activate vehicle
-* deactivate vehicle
-* view vehicle list
-
-Vehicles are created using simple identifiers such as:
-
-```text
-Tuk 1
-Tuk 2
-Bike 1
-```
-
-No number plate functionality should be added.
-
----
-
-# STEP 14 — DO NOT CHANGE OTHER ADMIN FEATURES
-
-Do not modify:
-
-* Collector management
-* Assignment management
-* Collection Requests
-* Collection Details
-* Dashboard
-* Leaderboard
-* Authentication
-* Settings
-* Notifications
-* navigation
-* layout
-* branding
-
-unless a tiny change is technically required to integrate the Rider vehicle field.
-
----
-
-# STEP 15 — NO MOCK DATA
-
-The dropdown MUST use:
-
-```text
-GET /admin/vehicles
-```
-
-from the real backend.
-
-Do not hardcode:
-
-```text
-Tuk 1
-Tuk 2
-Bike 1
-```
-
-Do not use mock vehicle arrays.
-
-The database is the source of truth.
-
----
-
-# STEP 16 — ERROR HANDLING
-
-Handle:
-
-### Vehicle API failure
-
-Show an actual error.
-
-Do not show an empty dropdown and pretend there are no vehicles.
-
-### 401
-
-Handle according to the existing authentication system.
-
-### 403
-
-Show appropriate permission error.
-
-### 404
-
-Show appropriate not-found error.
-
-### 409
+If there are no matching records:
 
 Show:
 
-```text
-This vehicle is already assigned to another rider.
-```
+"No records found for the selected filters."
 
-### 400
-
-Display backend validation information appropriately.
+Do NOT show fake report data.
 
 ---
 
-# STEP 17 — LOADING STATES
+# 14. REPORT ERROR STATE
 
-When opening the Rider form:
+If the backend report API fails:
 
-```text
-Loading vehicles...
-```
+Show an actual error.
 
-while the vehicle list is being fetched.
+Do NOT say:
 
-Do not show an empty dropdown before the request finishes.
+"No records found."
 
-If no active vehicles exist:
+when the API actually failed.
 
-```text
-No active vehicles available
-```
+Handle:
 
-The Admin should still be able to create a Rider without a vehicle if the backend allows `vehicleId = null`.
+* 400
+* 401
+* 403
+* 404
+* 500
 
----
-
-# STEP 18 — FORM VALIDATION
-
-Do not make vehicle assignment mandatory unless the backend/business requirement explicitly requires it.
-
-The preferred behavior is:
-
-```text
-Assigned Vehicle:
-[ No Vehicle Assigned ▼ ]
-```
-
-with active vehicles available.
-
-Do not change the existing password, NIC, mobile, or other validation.
-
-Only add validation required for the vehicle field.
+using the existing application error-handling system.
 
 ---
 
-# STEP 19 — TEST THE EXACT WORKFLOW
+# 15. REPORT LOADING STATE
+
+When generating a report:
+
+Show a loading state.
+
+Do not allow multiple accidental submissions while the request is running.
+
+---
+
+# 16. REAL API ONLY
+
+Reports must use the deployed backend API through:
+
+VITE_API_BASE_URL
+
+Do not connect directly to Supabase.
+
+Do not expose DATABASE_URL.
+
+Do not expose database credentials.
+
+Do not use mock report data.
+
+---
+
+# 17. EXPORT
+
+Do NOT add PDF/Excel/CSV export unless the backend actually supports it or this is explicitly implemented as part of the backend work.
+
+Do not fake an export button.
+
+If export is not available yet, the report should still work as an on-screen report using real API data.
+
+---
+
+# 18. DO NOT TOUCH QR
+
+Do NOT modify:
+
+* QR UI
+* QR token
+* QR verification
+* Collector QR
+* Rider QR scanning
+* QR API calls
+
+---
+
+# 19. DO NOT TOUCH FLUTTER
+
+This is the Admin frontend.
+
+Do not modify Flutter/mobile functionality.
+
+---
+
+# 20. DO NOT BREAK EXISTING FEATURES
+
+After implementing Reports and CRUD improvements, verify:
+
+* Login
+* Dashboard
+* Collectors
+* Riders
+* Vehicles
+* Assignments
+* Collection Requests
+* Leaderboard
+* Rider → Vehicle assignment
+
+still work.
+
+---
+
+# 21. TESTING
 
 Test:
 
-### 1. Create vehicle
+1. Sidebar Reports navigation.
+2. Dashboard Reports quick-access button.
+3. Reports page loads.
+4. Each report type.
+5. Date filtering.
+6. Collector filtering.
+7. Rider filtering.
+8. Vehicle filtering.
+9. Status filtering.
+10. Empty report result.
+11. API error.
+12. Loading state.
+13. Real database data.
+14. Existing CRUD operations.
 
-Create:
-
-```text
-Tuk 1
-```
-
-Verify it appears in Vehicle management.
-
-### 2. Create Rider
-
-Open Create Rider.
-
-Verify:
-
-```text
-Assigned Vehicle
-```
-
-appears.
-
-Verify `Tuk 1` appears in the dropdown.
-
-Select `Tuk 1`.
-
-Create Rider.
-
-### 3. Verify persistence
-
-Refresh the page.
-
-The Rider must still show:
-
-```text
-Tuk 1
-```
-
-### 4. Edit Rider
-
-Change:
-
-```text
-Tuk 1
-```
-
-to another active vehicle.
-
-Save.
-
-Refresh.
-
-Verify the new vehicle remains assigned.
-
-### 5. Duplicate assignment
-
-Try assigning the same vehicle to another Rider.
-
-The backend conflict should be displayed correctly.
-
-### 6. Inactive vehicle
-
-Deactivate a vehicle.
-
-Verify it cannot be selected for a new assignment.
-
-### 7. Existing Rider without vehicle
-
-Verify the Rider still displays correctly.
-
-### 8. Vehicle API failure
-
-Verify the UI shows an actual error rather than fake empty data.
-
----
-
-# STEP 20 — BUILD
-
-After implementation:
-
-* run TypeScript checking
-* run the production build
-* fix all actual type errors
-* verify API payloads
-* verify API responses
+Run TypeScript checks and production build.
 
 Do not use:
 
 * `any`
 * `@ts-ignore`
-* fake data
-* fake success messages
-* hardcoded vehicle lists
-
-to make the build pass.
+* mock report data
+* hardcoded report values
+* fake API success messages
 
 ---
 
-# 🚨 FINAL CHANGE-SCOPE CHECK
+# FINAL CHANGE-SCOPE CHECK
 
-Before finishing, inspect the Git diff.
+Inspect Git diff before finishing.
 
-The changes should be limited to the Rider vehicle assignment feature.
+Only changes related to:
 
-There should be NO unrelated changes to:
+* missing Admin CRUD UI
+* Reports sidebar
+* Reports page
+* Dashboard Reports quick access
+* report API integration
+* required report types
 
-* Collector
-* QR
-* Rider QR scanning
-* Collection Requests
-* Collections
-* Assignments
-* Dashboard
-* Leaderboard
-* Authentication
-* Settings
-* Notifications
-* Vehicle CRUD
-* unrelated UI components
+should be made.
 
-If unrelated changes were made, revert them.
+Do not modify unrelated working features.
 
----
-
-# FINAL RESULT
-
-The finished Admin Dashboard must behave like this:
-
-```text
-ADMIN
-  ↓
-VEHICLES
-  ↓
-Create "Tuk 1"
-  ↓
-RIDERS
-  ↓
-Create Rider
-  ↓
-Assigned Vehicle dropdown
-  ↓
-Tuk 1
-Tuk 2
-Bike 1
-  ↓
-Select Tuk 1
-  ↓
-Create Rider
-  ↓
-PostgreSQL stores Rider.vehicleId
-  ↓
-Rider displays "Tuk 1"
-```
-
-The existing Neptune Admin Dashboard must continue working exactly as before in every other area.
-
-Only add the Rider → Vehicle assignment feature.
-
-Do not change anything else.
+The Admin Dashboard must remain fully functional with real backend data.
