@@ -1,137 +1,254 @@
-# ADDITIONAL ADMIN FRONTEND REQUIREMENTS — CRUD + REPORTS
+# NEPTUNE ADMIN FRONTEND — DELETE + REPORTS REPAIR
 
-These are ADDITIONAL requirements for the existing NEPTUNE Admin Dashboard.
+You are working on the existing NEPTUNE Admin Dashboard frontend.
 
 The Admin Dashboard is already working.
 
-Do NOT redesign the application.
+This task has TWO purposes:
 
-Do NOT break existing functionality.
+1. Add real DELETE actions while KEEPING existing Activate/Deactivate actions.
+2. Fix the Reports section so it displays correct REAL backend data and allows the Admin to download the generated report as an Excel `.xlsx` file.
 
----
-
-# 1. COMPLETE CRUD OPERATIONS
-
-Audit every Admin management section and make sure the UI supports the CRUD operations actually available from the backend.
-
-Check:
-
-* Collectors
-* Riders
-* Vehicles
-* Daily Assignments
-* Collection Requests
-* Collections/Collection Records where Admin management is supported
-
-For each section verify:
-
-* list
-* details where applicable
-* create where applicable
-* edit where applicable
-* delete where applicable
-* activate/deactivate where applicable
-
-Do NOT create fake CRUD operations.
-
-Do NOT show a Delete/Edit button if the backend does not support the operation.
-
-Do not invent API endpoints.
-
-Use the actual backend API.
+Do not redesign unrelated parts of the application.
 
 ---
 
-# 2. REPORTS SIDEBAR SECTION
+# 🚨 CRITICAL — DO NOT TOUCH QR OR FLUTTER
 
-Add a new item to the Admin Dashboard sidebar:
+Do NOT modify:
 
-## Reports
+* QR functionality
+* Collector QR
+* Rider QR scanning
+* QR verification
+* QR-related API calls
 
-Example:
+Do NOT modify Flutter/mobile functionality.
 
-```text
-Dashboard
-Collectors
-Riders
-Vehicles
-Assignments
-Collection Requests
-Reports
-```
+Do not modify:
 
-Use the existing Neptune sidebar design.
-
-Do not redesign the sidebar.
+* Collector mobile workflow
+* Rider mobile workflow
+* mobile APIs
+* mobile authentication
 
 ---
 
-# 3. REPORTS PAGE
+# PART 1 — DELETE
 
-Create a dedicated Reports page.
+The Admin UI currently has Deactivate but is missing Delete.
 
-The page should allow Admin to select a report type.
+KEEP Deactivate.
 
-Example:
+DO NOT replace Deactivate with Delete.
 
-```text
-Reports
+The UI must support both:
 
-[ Collection Report ▼ ]
+* Activate / Deactivate
+* Delete
 
-Date From: [       ]
-Date To:   [       ]
-
-Collector: [ All ▼ ]
-Rider:     [ All ▼ ]
-Vehicle:   [ All ▼ ]
-Status:    [ All ▼ ]
-
-[ Generate Report ]
-```
-
-Only show filters relevant to the selected report.
-
-Do not invent filters for nonexistent backend fields.
+These are different operations.
 
 ---
 
-# 4. REPORT TYPES
+# 1. COLLECTOR DELETE
 
-Provide report options based on actual Neptune data:
+If the backend provides:
 
-* Collection Report
-* Collection Request Report
-* Collector Report
-* Rider Report
-* Vehicle Report
-* Assignment Report
+DELETE /admin/collectors/:id
 
-The report data must come from the backend.
+add a Delete action to the Collector management UI.
 
-Do NOT use mock data.
+The existing Deactivate action must remain.
 
-Do NOT hardcode report numbers.
+Before deleting, show a confirmation dialog:
+
+"Are you sure you want to permanently delete this collector?"
+
+Explain that deletion is permanent.
+
+Only call the DELETE endpoint after confirmation.
+
+After successful deletion:
+
+* refresh the real Collector list
+* show a success message
+* remove the deleted record from the UI
+
+If backend returns 409:
+
+show a clear message that the Collector cannot be deleted because related records must be preserved.
+
+Do not fake deletion.
 
 ---
 
-# 5. COLLECTION REPORT
+# 2. RIDER DELETE
 
-Display real information such as:
+If backend provides:
+
+DELETE /admin/riders/:id
+
+add a Delete action.
+
+Keep:
+
+Activate / Deactivate
+
+Do not remove it.
+
+Confirmation required.
+
+After deletion, refresh the Rider list from the backend.
+
+If the Rider had an assigned vehicle, deletion must NOT remove the vehicle.
+
+If backend returns 409:
+
+show the actual conflict appropriately.
+
+---
+
+# 3. VEHICLE DELETE
+
+If backend provides:
+
+DELETE /admin/vehicles/:id
+
+add a Delete action.
+
+Keep:
+
+Activate / Deactivate
+
+Do not remove Deactivate.
+
+Before deletion:
+
+show confirmation.
+
+If backend returns 409 because the vehicle is referenced by historical Collections:
+
+show a clear message.
+
+Do NOT pretend the vehicle was deleted.
+
+Do NOT remove it from the UI unless the backend confirms deletion.
+
+---
+
+# 4. ASSIGNMENT DELETE
+
+The Assignment page already has deletion support if available.
+
+Verify that it actually calls the real backend DELETE endpoint.
+
+After successful deletion:
+
+refresh real assignment data.
+
+Do not delete related Collector or Collection records.
+
+---
+
+# 5. DELETE UI RULES
+
+Use the existing Neptune UI style.
+
+Delete should be visually distinct as a destructive action.
+
+Do not make Delete and Deactivate look like the same operation.
+
+Every delete must require confirmation.
+
+Never perform deletion merely by removing the row from local React state.
+
+The database must actually be changed by the backend.
+
+---
+
+# PART 2 — REPORTS
+
+The existing Reports page currently does NOT provide reliable correct data.
+
+Fix it.
+
+The Reports page MUST use the real deployed backend API.
+
+No mock data.
+
+No hardcoded report values.
+
+No fabricated calculations.
+
+---
+
+# 6. AUDIT EVERY REPORT API CALL
+
+Inspect:
+
+`ReportsPage.tsx`
+
+and all report-related API/service code.
+
+For every report:
+
+verify the exact endpoint against the actual backend API.
+
+Do not guess endpoint names.
+
+Do not silently fall back to fake data.
+
+If an endpoint is missing from the deployed backend, report it clearly instead of inventing a response.
+
+---
+
+# 7. SIX REPORT TYPES
+
+Keep the existing six report types:
+
+1. Collection
+2. Collection Request
+3. Collector
+4. Rider
+5. Vehicle
+6. Assignment
+
+Each must display REAL backend data.
+
+---
+
+# 8. COLLECTION REPORT
+
+Display actual:
 
 * Collection ID
-* Request ID
+* Collection Request ID
 * Collector
 * Rider
 * Vehicle
 * Weight (kg)
-* Collection date/time
+* Collected At
 
-Use actual backend response fields.
+Use actual backend fields:
+
+`weightKg`
+
+`collectedAt`
+
+Do NOT use fake fields such as:
+
+`totalWeight`
+
+or:
+
+`collectionDate`
+
+unless they are actual response fields.
 
 ---
 
-# 6. COLLECTION REQUEST REPORT
+# 9. COLLECTION REQUEST REPORT
 
 Display:
 
@@ -139,152 +256,194 @@ Display:
 * Collector
 * Rider
 * Status
-* QR verification
+* QR Verified
 * Latitude
 * Longitude
-* Requested time
-* Accepted time
-* Completed time
-* Cancelled time
+* Requested At
+* Accepted At
+* Completed At
+* Cancelled At
 
-Only show fields returned by the backend.
+Use:
+
+`requestedAt`
+
+not an invented `createdDate`.
+
+Do not invent `assignmentId`.
 
 ---
 
-# 7. COLLECTOR REPORT
+# 10. COLLECTOR REPORT
 
-Display useful real Collector information and relevant activity.
+Use real Collector data.
 
-Do not display nonexistent fields such as:
+Do not display:
 
 * area
 * lastLogin
 
-unless the backend actually provides them.
+unless the backend actually returns them.
+
+Include useful real collection/request activity where provided by the report API.
 
 ---
 
-# 8. RIDER REPORT
+# 11. RIDER REPORT
 
-Display:
+Display real:
 
 * Rider
-* contact information
-* assigned vehicle where available
+* mobile
+* address where appropriate
+* assigned vehicle
 * collection activity
 
-Use the new Rider → Vehicle relationship from the backend.
+The assigned vehicle must come from the new Rider → Vehicle backend relationship.
 
-Do not invent vehicle data.
+Do not hardcode vehicle information.
 
 ---
 
-# 9. VEHICLE REPORT
+# 12. VEHICLE REPORT
 
-Display:
+Display real:
 
 * vehicle code
 * vehicle type
 * status
-* relevant collection information
+* collection activity where provided
 
-Example vehicle codes:
+Example:
 
-* Tuk 1
-* Tuk 2
-* Bike 1
+Tuk 1
 
 No number plate functionality.
 
 ---
 
-# 10. ASSIGNMENT REPORT
+# 13. ASSIGNMENT REPORT
 
-Display real:
+Display:
 
 * Assignment ID
 * Collector
 * Assignment Date
-* Created date
-* Updated date
+* Created At
+* Updated At
 
-Do NOT display:
+Use:
+
+`assignmentDate`
+
+Do not use:
+
+`date`
+
+Do not display fake:
 
 * area
-* fake assignment status
-* fake requestIds
-
-unless actually returned by the backend.
+* assignment status
+* requestIds
 
 ---
 
-# 11. FILTERS
+# 14. REPORT FILTERS MUST ACTUALLY WORK
 
-Use real backend filtering.
+The following filters must affect the generated report data:
 
-Where supported:
-
-* Date From
-* Date To
+* From date
+* To date
 * Collector
 * Rider
 * Vehicle
 * Status
 
+When the Admin changes a filter and clicks Generate Report:
+
+send the filter values to the backend.
+
+Do NOT:
+
+1. load all records,
+2. display incorrect data,
+3. filter unrelated frontend fields.
+
+The report must correspond to the selected filters.
+
+---
+
+# 15. DATE FILTERS
+
 Do not hardcode dates.
 
-Do not use fake filtering on data already loaded if the dataset could be large.
+Do not use the old hardcoded date logic.
 
-Prefer backend filtering when the API supports it.
+Do not introduce timezone bugs.
 
----
+Use the backend's report filtering contract.
 
-# 12. GENERATE REPORT QUICK ACCESS
-
-Add a Reports quick-access card/button to the main Dashboard.
-
-Example:
-
-```text
-Quick Access
-
-┌─────────────────────┐
-│  📊 Generate Report │
-│  View system reports│
-└─────────────────────┘
-```
-
-Clicking it should navigate directly to the Reports page.
-
-Use the existing Dashboard visual style.
-
-Do not redesign the Dashboard.
+The displayed report dates must correspond to the actual database timestamps/dates.
 
 ---
 
-# 13. REPORT EMPTY STATE
+# 16. REPORT SUMMARY
 
-If there are no matching records:
+If backend provides summary values, display them.
 
-Show:
+Examples:
 
-"No records found for the selected filters."
+* Total records
+* Total weight
+* Completed
+* Pending
+* Accepted
+* Cancelled
 
-Do NOT show fake report data.
+These must correspond to the currently selected filters.
+
+Do not calculate a summary from unfiltered data.
+
+Do not invent values.
 
 ---
 
-# 14. REPORT ERROR STATE
+# 17. REPORT TABLE
 
-If the backend report API fails:
+The table must update after:
 
-Show an actual error.
+* Generate Report
+* changing filters
+* clearing filters
+* selecting a different report type
 
-Do NOT say:
+Do not show old report results as if they belong to the new filters.
+
+---
+
+# 18. LOADING STATE
+
+While generating a report:
+
+show a proper loading state.
+
+Disable the Generate button while the request is running.
+
+Do not send duplicate requests unnecessarily.
+
+---
+
+# 19. ERROR STATE
+
+If the backend report request fails:
+
+show an actual error.
+
+Do NOT show:
 
 "No records found."
 
-when the API actually failed.
+when the API returned an error.
 
 Handle:
 
@@ -292,133 +451,286 @@ Handle:
 * 401
 * 403
 * 404
+* 409
 * 500
 
-using the existing application error-handling system.
+using the existing frontend error handling.
 
 ---
 
-# 15. REPORT LOADING STATE
+# 20. EMPTY STATE
 
-When generating a report:
+If the backend successfully returns zero records:
 
-Show a loading state.
+show:
 
-Do not allow multiple accidental submissions while the request is running.
+"No records found for the selected filters."
 
----
-
-# 16. REAL API ONLY
-
-Reports must use the deployed backend API through:
-
-VITE_API_BASE_URL
-
-Do not connect directly to Supabase.
-
-Do not expose DATABASE_URL.
-
-Do not expose database credentials.
-
-Do not use mock report data.
+This is different from an API error.
 
 ---
 
-# 17. EXPORT
+# PART 3 — EXCEL DOWNLOAD
 
-Do NOT add PDF/Excel/CSV export unless the backend actually supports it or this is explicitly implemented as part of the backend work.
+After generating a report, provide:
 
-Do not fake an export button.
+**Download Excel**
 
-If export is not available yet, the report should still work as an on-screen report using real API data.
+button.
 
----
+Example:
 
-# 18. DO NOT TOUCH QR
+```text
+[ Generate Report ]    [ Download Excel ]
+```
 
-Do NOT modify:
+The Excel file must contain the SAME report data currently displayed.
 
-* QR UI
-* QR token
-* QR verification
-* Collector QR
-* Rider QR scanning
-* QR API calls
+It must respect all selected filters.
 
 ---
 
-# 19. DO NOT TOUCH FLUTTER
+# 21. EXCEL REQUIREMENTS
 
-This is the Admin frontend.
+Generate a real `.xlsx` file.
 
-Do not modify Flutter/mobile functionality.
+Use a proper Excel library such as:
 
----
+`xlsx`
 
-# 20. DO NOT BREAK EXISTING FEATURES
+or another existing project-supported library.
 
-After implementing Reports and CRUD improvements, verify:
+Do not generate a fake `.xls` text file.
 
-* Login
-* Dashboard
-* Collectors
-* Riders
-* Vehicles
-* Assignments
-* Collection Requests
-* Leaderboard
-* Rider → Vehicle assignment
+Do not rename CSV to `.xlsx`.
 
-still work.
+The file must open correctly in Microsoft Excel/LibreOffice/Google Sheets.
 
 ---
 
-# 21. TESTING
+# 22. EXCEL CONTENT
 
-Test:
+The columns must correspond to the selected report type.
 
-1. Sidebar Reports navigation.
-2. Dashboard Reports quick-access button.
-3. Reports page loads.
-4. Each report type.
-5. Date filtering.
-6. Collector filtering.
-7. Rider filtering.
-8. Vehicle filtering.
-9. Status filtering.
-10. Empty report result.
-11. API error.
-12. Loading state.
-13. Real database data.
-14. Existing CRUD operations.
+For example:
 
-Run TypeScript checks and production build.
+### Collection Report
 
-Do not use:
+* Collection ID
+* Request ID
+* Collector
+* Rider
+* Vehicle
+* Weight (kg)
+* Collected At
 
-* `any`
-* `@ts-ignore`
-* mock report data
-* hardcoded report values
-* fake API success messages
+### Collection Request Report
+
+* Request ID
+* Collector
+* Rider
+* Status
+* QR Verified
+* Latitude
+* Longitude
+* Requested At
+* Accepted At
+* Completed At
+* Cancelled At
+
+### Collector Report
+
+Use the actual columns displayed by the report.
+
+### Rider Report
+
+Use the actual columns displayed by the report.
+
+### Vehicle Report
+
+Use the actual columns displayed by the report.
+
+### Assignment Report
+
+Use:
+
+* Assignment ID
+* Collector
+* Assignment Date
+* Created At
+* Updated At
+
+Do not include fake fields.
 
 ---
 
-# FINAL CHANGE-SCOPE CHECK
+# 23. EXCEL MUST MATCH FILTERED REPORT
 
-Inspect Git diff before finishing.
+Example:
 
-Only changes related to:
+Admin selects:
 
-* missing Admin CRUD UI
-* Reports sidebar
-* Reports page
-* Dashboard Reports quick access
-* report API integration
-* required report types
+```text
+From: 2026-08-01
+To:   2026-08-18
+Rider: Rider A
+Vehicle: Tuk 1
+```
 
-should be made.
+The displayed report must contain only matching records.
 
-Do not modify unrelated working features.
+The downloaded Excel must contain exactly that same filtered dataset.
 
-The Admin Dashboard must remain fully functional with real backend data.
+Do NOT download the entire database.
+
+---
+
+# 24. EXCEL FILE NAME
+
+Use a sensible filename such as:
+
+`neptune-collection-report-2026-08-18.xlsx`
+
+or:
+
+`neptune-rider-report.xlsx`
+
+Do not include sensitive information in filenames.
+
+---
+
+# 25. DOWNLOAD BUTTON STATE
+
+Before a report has been generated:
+
+Disable:
+
+`Download Excel`
+
+After a successful report with data:
+
+Enable it.
+
+If there are zero results:
+
+Either disable the button or clearly prevent downloading an empty report.
+
+Do not download fake data.
+
+---
+
+# 26. REPORT API DATA MUST BE REAL
+
+The frontend must use:
+
+`VITE_API_BASE_URL`
+
+and the deployed backend.
+
+Do NOT connect directly to Supabase.
+
+Do NOT access PostgreSQL from the frontend.
+
+Do NOT include:
+
+* DATABASE_URL
+* PostgreSQL password
+* Supabase service role key
+* JWT secret
+
+in frontend code.
+
+---
+
+# 27. REAL DATA VERIFICATION
+
+Test every report against actual database records.
+
+For each report:
+
+1. Generate with no filters.
+2. Generate with date filters.
+3. Generate with Collector filter.
+4. Generate with Rider filter.
+5. Generate with Vehicle filter.
+6. Generate with Status filter.
+7. Combine multiple filters.
+8. Test zero results.
+9. Download Excel.
+10. Open the Excel file and verify it matches the displayed report.
+
+Do not mark the feature complete until the displayed data and downloaded Excel match the actual database data.
+
+---
+
+# 28. DO NOT HIDE BACKEND PROBLEMS
+
+If the backend report endpoint returns incorrect data:
+
+DO NOT patch it with fake frontend calculations.
+
+Report exactly:
+
+* endpoint
+* request parameters
+* incorrect response
+* expected response
+
+Then the backend developer can fix the actual Prisma query.
+
+---
+
+# 29. PRESERVE EVERYTHING ELSE
+
+Do not modify:
+
+* QR
+* Flutter/mobile
+* Collector workflow
+* Rider workflow
+* collection workflow
+* authentication
+* existing Rider → Vehicle assignment
+* existing Deactivate functionality
+* existing working Vehicle CRUD
+* unrelated dashboard features
+
+Only modify:
+
+* Delete actions
+* Reports
+* Excel download
+* required report API integration
+
+---
+
+# FINAL TEST
+
+Run:
+
+* TypeScript check
+* production build
+* all Admin CRUD tests
+* report tests
+* Excel download test
+
+Inspect Git diff.
+
+There must be no unrelated changes.
+
+Final result must be:
+
+REAL DATABASE
+↓
+BACKEND REPORT API
+↓
+ADMIN REPORT PAGE
+↓
+CORRECT FILTERED DATA
+↓
+CORRECT EXCEL DOWNLOAD
+
+No mock data.
+No fake report values.
+No fake delete.
+No fake success messages.
