@@ -1,900 +1,702 @@
-# NEPTUNE ADMIN FRONTEND — FULL API ALIGNMENT AND REPAIR
+# NEPTUNE ADMIN FRONTEND — ADD RIDER VEHICLE ASSIGNMENT ONLY
 
-You are working inside the NEPTUNE Admin Dashboard frontend project.
+You are working inside the existing NEPTUNE Admin Dashboard frontend.
 
-Your task is to make the Admin Dashboard work correctly with the EXISTING NEPTUNE backend and PostgreSQL data.
+The Admin Dashboard is already working correctly with the backend.
 
-The backend project is separate.
+I need ONE new feature:
 
-The backend is the source of truth.
+## WHEN CREATING OR EDITING A RIDER, ADMIN MUST BE ABLE TO ASSIGN AN EXISTING VEHICLE
 
-DO NOT invent backend fields.
+Example:
 
-DO NOT redesign the backend.
+Existing Vehicles:
 
-DO NOT create fake data.
+* Tuk 1
+* Tuk 2
+* Bike 1
 
-DO NOT use mock data as a substitute for API data.
-
----
-
-# CRITICAL OBJECTIVE
-
-The Admin Dashboard must display and manipulate REAL data from the existing backend API.
-
-Every management operation must actually persist to PostgreSQL through the backend.
-
-The dashboard must not merely look functional.
-
-A button that says "Saved" without a successful backend request is NOT acceptable.
-
----
-
-# SOURCE OF TRUTH
-
-Use this order of authority:
-
-1. Actual backend source code
-2. Prisma/database schema
-3. Backend DTOs/controllers/services
-4. NEPTUNE_API_HANDOVER.md
-5. Existing project requirements
-6. Existing Admin frontend assumptions
-
-If the frontend conflicts with the backend:
-
-FIX THE FRONTEND.
-
-Do not modify the backend simply because the frontend expects a field that does not exist.
-
----
-
-# VERY IMPORTANT — DO NOT TOUCH BACKEND
-
-This OpenCode project is the ADMIN FRONTEND project.
-
-Do not attempt to modify the backend repository.
-
-Do not create backend files inside this project.
-
-Do not redesign API endpoints.
-
-Do not invent API endpoints.
-
-Use the existing backend API.
-
----
-
-# ACTUAL DATA MODEL
-
-The frontend must align with the actual backend entities.
-
-## Collector
-
-Use actual fields:
-
-* id
-* userId
-* fullName
-* nic
-* mobile
-* address
-* guardianName
-* guardianMobile
-* qrToken
-* createdAt
-* updatedAt
-
-REMOVE frontend assumptions such as:
-
-* area
-* lastLogin
-
-unless the backend actually provides them.
-
----
-
-## Rider
-
-Use:
-
-* id
-* userId
-* fullName
-* nic
-* mobile
-* address
-* createdAt
-* updatedAt
-
-DO NOT assume Rider has:
-
-* vehicleType
-* vehicleNumber
-* vehicleColour
-* assignedVehicleId
-
-Those are not part of the actual Rider model.
-
-Remove them from Rider create/edit forms.
-
-Do not send them to the backend.
-
----
-
-## Vehicle
-
-Use:
-
-* id
-* vehicleCode
-* vehicleType
-* status
-* createdAt
-* updatedAt
-
-Vehicle creation must send only the fields the backend accepts.
-
-Do NOT send `status` during creation if the backend sets the default status.
-
-Status changes must use the proper status endpoint.
-
----
-
-## Daily Assignment
-
-Use:
-
-* id
-* collectorId
-* assignmentDate
-* createdAt
-* updatedAt
-
-The frontend currently uses:
-
-`date`
-
-Change the frontend to use:
-
-`assignmentDate`
-
-Do NOT send:
-
-* area
-* status
-
-because they are not part of the actual assignment model.
-
----
-
-## Collection Request
-
-Use:
-
-* id
-* collectorId
-* riderId
-* latitude
-* longitude
-* status
-* qrVerified
-* requestedAt
-* acceptedAt
-* completedAt
-* cancelledAt
-* createdAt
-* updatedAt
-
-Do NOT invent:
-
-* assignmentId
-* area
-* fake location object
-* fake totalWeight fields
-
-Use latitude/longitude correctly.
-
----
-
-## Collection
-
-Use:
-
-* id
-* collectionRequestId
-* collectorId
-* riderId
-* vehicleId
-* weightKg
-* collectedAt
-* createdAt
-* updatedAt
-
-Collection information should come from the real backend response.
-
----
-
-# FIRST TASK — INSPECT BEFORE EDITING
-
-Before changing code:
-
-1. Inspect all frontend files.
-2. Inspect API service files.
-3. Inspect TypeScript types.
-4. Inspect all pages.
-5. Inspect all forms/modals.
-6. Inspect authentication.
-7. Inspect dashboard statistics.
-8. Inspect collection request normalization.
-9. Inspect mock data.
-10. Inspect environment variables.
-11. Compare every API call with the actual backend API contract.
-
-Do not immediately rewrite the application.
-
-Identify all mismatches first.
-
----
-
-# FIX TYPES FIRST
-
-The existing frontend TypeScript interfaces contain fields that do not exist in the backend.
-
-Correct the types so they accurately represent backend responses.
-
-For example, replace incorrect:
-
-`createdDate`
-
-with:
-
-`createdAt`
-
-Replace incorrect:
-
-`date`
-
-with:
-
-`assignmentDate`
-
-Remove fake fields such as:
-
-`area`
-
-`lastLogin`
-
-`assignedVehicleId`
-
-`assignedRiderId`
-
-`assignmentId`
-
-where they are not supported by the backend.
-
-Do not simply use `any` to hide type problems.
-
-Do not use `as any` to bypass API mismatches.
-
-Use accurate interfaces/types.
-
----
-
-# FIX COLLECTOR MANAGEMENT
-
-Collector list/create/edit/status must work with real backend data.
-
-Verify:
-
-GET /admin/collectors
-
-GET /admin/collectors/:id
-
-POST /admin/collectors
-
-PATCH /admin/collectors/:id
-
-PATCH /admin/collectors/:id/status
-
-Fix:
-
-* field mappings
-* date display
-* validation
-* create payload
-* update payload
-* loading state
-* error state
-* success handling
-
-Do not display `area` if backend does not provide it.
-
-Do not display fake `lastLogin`.
-
----
-
-# FIX RIDER MANAGEMENT
-
-This is a major repair.
-
-The Rider form currently contains vehicle-related fields that do not belong to the backend Rider model.
-
-Remove from Rider creation/editing:
-
-* vehicleType
-* vehicleNumber
-* vehicleColour
-* assignedVehicleId
-
-The create payload should match the backend DTO.
-
-It should contain only the supported Rider fields.
-
-Do not send unsupported fields.
-
-Make sure:
-
-POST /admin/riders
-
-and:
-
-PATCH /admin/riders/:id
-
-work successfully.
-
-Also fix frontend validation so it matches backend validation.
-
-The backend requires an 8-character minimum password where applicable.
-
-Do not tell users 4 characters is enough.
-
----
-
-# FIX VEHICLE MANAGEMENT
-
-Vehicle creation currently sends `status`.
-
-Do not send unsupported fields.
-
-Creation should use the actual backend contract.
-
-Status changes should use:
-
-PATCH /admin/vehicles/:id/status
-
-Fix:
-
-* list
-* details
-* create
-* edit
-* activate/deactivate
-* validation
-* errors
-* loading states
-
-Do not create a fake Rider ↔ Vehicle permanent assignment UI.
-
-A vehicle is associated with a Collection through `vehicleId`, not permanently assigned to a Rider.
-
----
-
-# FIX DAILY ASSIGNMENTS
-
-This is a critical repair.
-
-The current frontend uses:
-
-`date`
-
-but the backend uses:
-
-`assignmentDate`
-
-Change all relevant frontend types, forms, table columns, filters, API payloads, and details pages.
-
-Correct create payload:
+Rider form:
 
 ```text
-{
-  collectorId,
-  assignmentDate
-}
+Full Name: Sahan
+NIC: ...
+Mobile: ...
+Address: ...
+
+Assigned Vehicle:
+[ Tuk 1 ▼ ]
 ```
+
+The selected vehicle must be saved to the backend as the Rider's assigned vehicle.
+
+---
+
+# 🚨 CRITICAL RULE
+
+DO NOT CHANGE ANYTHING ELSE.
+
+The current Admin Dashboard is already working.
+
+Do not refactor unrelated pages.
+
+Do not redesign the dashboard.
+
+Do not modify working Collector functionality.
+
+Do not modify Vehicle CRUD except where absolutely necessary to support the dropdown.
+
+Do not modify Assignments.
+
+Do not modify Collection Requests.
+
+Do not modify Dashboard statistics.
+
+Do not modify Leaderboard.
+
+Do not modify authentication.
+
+Do not modify Settings.
+
+Do not add unrelated features.
+
+This is a targeted Rider → Vehicle assignment feature.
+
+---
+
+# 🚨 DO NOT TOUCH QR
+
+The QR functionality is unrelated to this feature.
+
+DO NOT modify:
+
+* QR UI
+* QR fields
+* Collector QR
+* QR display
+* QR generation
+* QR verification
+* Rider QR scanning
+* QR-related API calls
+
+Leave all QR functionality exactly as it currently works.
+
+---
+
+# 🚨 DO NOT TOUCH FLUTTER
+
+This is the Admin frontend.
+
+Do not modify Flutter code.
+
+Do not create mobile UI.
+
+Do not change mobile API assumptions.
+
+The separate Flutter Collector/Rider applications are outside the scope of this task.
+
+---
+
+# STEP 1 — INSPECT EXISTING ADMIN FRONTEND
+
+Before editing:
+
+1. Inspect Rider types.
+2. Inspect Rider form/modal.
+3. Inspect Rider create API call.
+4. Inspect Rider update API call.
+5. Inspect Vehicle types.
+6. Inspect Vehicle API service.
+7. Inspect existing Vehicle list endpoint.
+8. Inspect authentication/API client.
+9. Inspect existing validation.
+10. Inspect existing UI patterns.
+
+Do not rewrite working components.
+
+---
+
+# STEP 2 — ADD VEHICLE TO RIDER TYPE
+
+The Rider frontend model should support the new backend relationship.
+
+Add:
+
+```text
+vehicleId
+vehicle
+```
+
+where appropriate.
+
+The exact TypeScript type should match the updated backend response.
+
+Example:
+
+```text
+vehicleId: string | null
+```
+
+and optionally:
+
+```text
+vehicle?: {
+  id: string
+  vehicleCode: string
+  vehicleType: string
+  status: string
+} | null
+```
+
+Do not use `any`.
+
+Do not use `@ts-ignore`.
+
+Do not hide type errors.
+
+---
+
+# STEP 3 — VEHICLE DROPDOWN
+
+In the Rider Create/Edit form, add:
+
+```text
+Assigned Vehicle
+```
+
+as a dropdown/select.
+
+When the form opens:
+
+Call the existing Admin Vehicle endpoint:
+
+```text
+GET /admin/vehicles
+```
+
+Do NOT create another backend endpoint if the existing endpoint already provides the required data.
+
+---
+
+# STEP 4 — ONLY SHOW ACTIVE VEHICLES FOR NEW ASSIGNMENT
+
+The dropdown should show vehicles that are currently ACTIVE.
+
+Example:
+
+```text
+Assigned Vehicle
+----------------
+Tuk 1
+Tuk 2
+Bike 1
+```
+
+Do not show inactive vehicles as selectable options for a new assignment.
+
+Use the real backend `status`.
+
+Do not hardcode the vehicle list.
+
+Do not use mock vehicle data.
+
+---
+
+# STEP 5 — DISPLAY VEHICLE CODE
+
+The vehicle dropdown should primarily display:
+
+```text
+vehicleCode
+```
+
+Examples:
+
+* Tuk 1
+* Tuk 2
+* Bike 1
+
+Vehicle type can optionally be displayed for clarity:
+
+```text
+Tuk 1 — Tuk
+Tuk 2 — Tuk
+Bike 1 — Bike
+```
+
+Do not add number plate fields.
+
+The system does NOT require number plates.
+
+---
+
+# STEP 6 — CREATE RIDER
+
+When creating a Rider, send the selected:
+
+```text
+vehicleId
+```
+
+to the backend.
+
+The Rider create payload must remain the existing correct payload plus:
+
+```text
+vehicleId
+```
+
+Do not send unrelated fields.
 
 Do NOT send:
 
+* vehicleNumber
+* vehicleColour
 * area
-* status
-
-Do not display fake assignment statuses.
-
-Use the real assignment data.
-
-Make:
-
-GET /admin/assignments
-
-GET /admin/assignments/:id
-
-POST /admin/assignments
-
-PATCH /admin/assignments/:id
-
-DELETE /admin/assignments/:id
-
-work correctly.
-
----
-
-# FIX DASHBOARD STATISTICS
-
-The dashboard must use REAL API data.
-
-Check every calculation.
-
-A major existing bug is that the frontend checks:
-
-`assignment.date`
-
-instead of:
-
-`assignment.assignmentDate`
-
-Fix this.
-
-Dashboard values should be derived from actual API responses.
-
-Do not hardcode values.
-
-Do not create fake statistics.
-
-Do not use mock data.
-
----
-
-# FIX COLLECTION REQUESTS
-
-The Collection Requests page must display actual backend records.
-
-Correct field mappings:
-
-`requestedAt`
-
-`acceptedAt`
-
-`completedAt`
-
-`cancelledAt`
-
-`latitude`
-
-`longitude`
-
-`status`
-
-`qrVerified`
-
-`collection.weightKg`
-
-`collection.collectedAt`
-
-where available.
-
-Remove fake:
-
-`assignmentId`
-
-Do not invent a relationship between CollectionRequest and DailyAssignment.
-
----
-
-# FIX COLLECTION REQUEST DETAILS
-
-The current details page expects frontend fields that don't match the backend.
-
-Do not directly assume:
-
-* createdDate
-* location
-* totalWeight
-* collectionDate
+* lastLogin
 * assignmentId
+* fake vehicle fields
 
-Instead, correctly map the real backend response.
+Only the actual backend-supported `vehicleId` should be added.
 
-If the backend response is nested, use the nested structure.
+---
 
-For example, collection information should come from the actual `collection` relation where provided.
+# STEP 7 — EDIT RIDER
+
+When editing an existing Rider:
+
+If the Rider already has:
+
+```text
+vehicleId
+```
+
+the dropdown must automatically show the currently assigned vehicle.
+
+Example:
+
+```text
+Assigned Vehicle
+[ Tuk 1 ▼ ]
+```
+
+Admin must be able to change it:
+
+```text
+Tuk 1
+↓
+Tuk 2
+```
+
+Then save the Rider.
+
+The new vehicle assignment must persist to the backend/database.
+
+---
+
+# STEP 8 — REMOVE VEHICLE ASSIGNMENT
+
+If the backend supports nullable vehicleId, provide a clean option such as:
+
+```text
+No Vehicle Assigned
+```
+
+This should set:
+
+```text
+vehicleId = null
+```
+
+Do not invent a fake vehicle ID.
+
+If the current backend does not support clearing the assignment, do not fake it. Report that backend support is required.
+
+---
+
+# STEP 9 — HANDLE VEHICLE ALREADY ASSIGNED
+
+The backend should prevent two Riders from being assigned to the same vehicle.
+
+If the API returns:
+
+```text
+409 Conflict
+```
+
+show a clear Admin message such as:
+
+```text
+This vehicle is already assigned to another rider.
+```
+
+Do not silently overwrite another Rider's assignment.
+
+Do not retry automatically.
+
+---
+
+# STEP 10 — VEHICLE STATUS
+
+Only ACTIVE vehicles should normally appear in the assignment dropdown.
+
+However, if an existing Rider is already assigned to a vehicle that has since become inactive, do not silently remove that assignment.
+
+For an existing Rider, the UI may display the currently assigned inactive vehicle as the current value so the Admin understands the existing state.
+
+When changing the assignment, only ACTIVE vehicles should be selectable.
+
+Do not automatically modify vehicle status.
+
+---
+
+# STEP 11 — RIDER LIST
+
+Update the Rider list to show the assigned vehicle where appropriate.
+
+Example:
+
+```text
+Rider        Mobile       Assigned Vehicle
+Sahan        07XXXXXXXX   Tuk 1
+Kamal        07XXXXXXXX   Bike 1
+```
+
+If no vehicle is assigned:
+
+```text
+No Vehicle
+```
+
+Use actual backend data.
+
+Do not display fake vehicle information.
+
+---
+
+# STEP 12 — RIDER DETAILS
+
+If the Admin Dashboard has a Rider details page/modal, display:
+
+```text
+Assigned Vehicle
+Tuk 1
+```
+
+using the real backend relation.
+
+Do not invent a vehicle assignment.
+
+---
+
+# STEP 13 — DO NOT CHANGE VEHICLE CRUD
+
+The existing Vehicle section is already working.
+
+Keep it working.
+
+Admin should still be able to:
+
+* create vehicle
+* edit vehicle
+* activate vehicle
+* deactivate vehicle
+* view vehicle list
+
+Vehicles are created using simple identifiers such as:
+
+```text
+Tuk 1
+Tuk 2
+Bike 1
+```
+
+No number plate functionality should be added.
+
+---
+
+# STEP 14 — DO NOT CHANGE OTHER ADMIN FEATURES
+
+Do not modify:
+
+* Collector management
+* Assignment management
+* Collection Requests
+* Collection Details
+* Dashboard
+* Leaderboard
+* Authentication
+* Settings
+* Notifications
+* navigation
+* layout
+* branding
+
+unless a tiny change is technically required to integrate the Rider vehicle field.
+
+---
+
+# STEP 15 — NO MOCK DATA
+
+The dropdown MUST use:
+
+```text
+GET /admin/vehicles
+```
+
+from the real backend.
+
+Do not hardcode:
+
+```text
+Tuk 1
+Tuk 2
+Bike 1
+```
+
+Do not use mock vehicle arrays.
+
+The database is the source of truth.
+
+---
+
+# STEP 16 — ERROR HANDLING
+
+Handle:
+
+### Vehicle API failure
+
+Show an actual error.
+
+Do not show an empty dropdown and pretend there are no vehicles.
+
+### 401
+
+Handle according to the existing authentication system.
+
+### 403
+
+Show appropriate permission error.
+
+### 404
+
+Show appropriate not-found error.
+
+### 409
 
 Show:
 
-* request ID
-* collector
-* rider
-* request status
-* QR verification status
-* latitude
-* longitude
-* requested time
-* accepted time
-* completed time
-* cancelled time
-* collection weight
-* vehicle
-* collection date/time
+```text
+This vehicle is already assigned to another rider.
+```
 
-Only show values that actually exist.
+### 400
+
+Display backend validation information appropriately.
 
 ---
 
-# FIX "TODAY" FILTER
+# STEP 17 — LOADING STATES
 
-There is currently a hardcoded date:
+When opening the Rider form:
 
-`2026-08-16`
+```text
+Loading vehicles...
+```
 
-This is WRONG.
+while the vehicle list is being fetched.
 
-Remove all hardcoded business dates.
+Do not show an empty dropdown before the request finishes.
 
-The Today filter must dynamically calculate the current local date.
+If no active vehicles exist:
 
-Do not use UTC conversions carelessly for business dates.
+```text
+No active vehicles available
+```
 
-The application is used in Sri Lanka.
-
-Use a consistent local-date utility.
-
----
-
-# FIX DATE HANDLING
-
-Do not repeatedly use:
-
-`new Date().toISOString().slice(0, 10)`
-
-without considering timezone/business-date semantics.
-
-Create one reliable date utility for:
-
-* today's date
-* displaying dates
-* displaying date/time
-* assignment dates
-* filtering
-
-Do not introduce off-by-one-day bugs.
+The Admin should still be able to create a Rider without a vehicle if the backend allows `vehicleId = null`.
 
 ---
 
-# FIX SETTINGS
+# STEP 18 — FORM VALIDATION
 
-The current Settings page contains fake behavior such as:
+Do not make vehicle assignment mandatory unless the backend/business requirement explicitly requires it.
 
-showing "Admin profile updated" without making an API request.
+The preferred behavior is:
 
-Do NOT pretend data was saved.
+```text
+Assigned Vehicle:
+[ No Vehicle Assigned ▼ ]
+```
 
-Inspect the actual backend.
+with active vehicles available.
 
-If Admin profile editing is not supported by the backend:
+Do not change the existing password, NIC, mobile, or other validation.
 
-DO NOT fake it.
-
-Either:
-
-1. Remove unsupported editing controls, or
-2. Make the UI clearly read-only for information that cannot be edited.
-
-Do not create fake API calls.
-
-Do not store fake admin profile data locally and pretend it is PostgreSQL data.
+Only add validation required for the vehicle field.
 
 ---
 
-# FIX NOTIFICATIONS
+# STEP 19 — TEST THE EXACT WORKFLOW
 
-There is no established notification API in the backend.
+Test:
 
-Do not create fake notification data.
+### 1. Create vehicle
 
-Do not display fake unread counts.
+Create:
 
-If notifications are not supported:
+```text
+Tuk 1
+```
 
-Remove or disable the notification feature cleanly rather than pretending it works.
+Verify it appears in Vehicle management.
 
----
+### 2. Create Rider
 
-# FIX REMEMBER ME
+Open Create Rider.
 
-The current Remember Me checkbox does not actually change authentication persistence.
+Verify:
 
-Do not leave a fake checkbox.
+```text
+Assigned Vehicle
+```
 
-Either implement it correctly using the existing authentication architecture without weakening security, or remove it.
+appears.
 
-Do not claim it works if it does not.
+Verify `Tuk 1` appears in the dropdown.
 
----
+Select `Tuk 1`.
 
-# FIX AUTHENTICATION ERROR HANDLING
+Create Rider.
 
-Authentication should:
+### 3. Verify persistence
 
-* login using the actual backend
-* store access token
-* send Bearer token
-* load `/auth/me`
-* protect admin routes
-* handle expired/invalid JWT
-* handle 401
-* handle 403
+Refresh the page.
 
-When the API returns 401:
+The Rider must still show:
 
-Clear the invalid session appropriately and return the user to login.
+```text
+Tuk 1
+```
 
-When the API returns 403:
+### 4. Edit Rider
 
-Show an appropriate forbidden state.
+Change:
 
-Do not silently swallow authentication errors.
+```text
+Tuk 1
+```
 
----
+to another active vehicle.
 
-# REMOVE REAL MOCK DOMAIN DATA
+Save.
 
-Search the entire project for:
+Refresh.
 
-* mock collectors
-* mock riders
-* mock vehicles
-* mock assignments
-* mock requests
-* hardcoded statistics
-* hardcoded dates
-* fake API responses
-* `setTimeout` used to simulate saves
-* placeholder success messages
+Verify the new vehicle remains assigned.
 
-Remove or replace actual mock business data.
+### 5. Duplicate assignment
 
-UI constants are allowed if they are genuinely static presentation values.
+Try assigning the same vehicle to another Rider.
 
-Do not remove legitimate icons, styles, or UI constants merely because they are in a file named `mock.ts`.
+The backend conflict should be displayed correctly.
 
----
+### 6. Inactive vehicle
 
-# API SERVICE LAYER
+Deactivate a vehicle.
 
-Centralize API calls where practical.
+Verify it cannot be selected for a new assignment.
 
-Use the existing API base URL:
+### 7. Existing Rider without vehicle
 
-`VITE_API_BASE_URL`
+Verify the Rider still displays correctly.
 
-Do not hardcode production URLs into components.
+### 8. Vehicle API failure
 
-Do not expose database credentials.
-
-The frontend must NEVER contain:
-
-* DATABASE_URL
-* PostgreSQL password
-* Prisma credentials
-* JWT signing secret
-* Supabase service-role secret
-
-Only the public backend API URL belongs in the frontend environment.
+Verify the UI shows an actual error rather than fake empty data.
 
 ---
 
-# ERROR HANDLING
+# STEP 20 — BUILD
 
-Every API operation must properly handle:
+After implementation:
 
-200/201 success
+* run TypeScript checking
+* run the production build
+* fix all actual type errors
+* verify API payloads
+* verify API responses
 
-400 validation errors
+Do not use:
 
-401 unauthorized
-
-403 forbidden
-
-404 not found
-
-409 conflict
-
-500 server errors
-
-Do not show "success" unless the API actually succeeds.
-
-Show useful error messages.
-
-Do not hide errors with empty catch blocks.
-
----
-
-# LOADING AND EMPTY STATES
-
-Every API-driven page must have:
-
-* loading state
-* empty state
-* error state
-* successful state
-
-Do not confuse:
-
-"API failed"
-
-with:
-
-"No data exists."
-
-For example, if `/admin/collectors` returns 500, do not display:
-
-"No collectors found."
-
-Display an actual error state.
-
----
-
-# REAL DATABASE DATA REQUIREMENT
-
-All Admin Dashboard business information must come from:
-
-Admin Frontend
-↓
-NestJS Backend
-↓
-PostgreSQL
-
-Do not connect the frontend directly to PostgreSQL.
-
-Do not connect the frontend directly to Supabase database tables.
-
-Do not bypass the backend.
-
----
-
-# UI REQUIREMENT
-
-Keep the existing Neptune design unless a UI change is required to remove an invalid feature.
-
-Do not redesign the whole dashboard.
-
-Do not replace working components unnecessarily.
-
-Focus on correctness and API integration.
-
----
-
-# IMPORTANT — DO NOT INVENT FEATURES
-
-Do not add:
-
-* payroll
-* earnings
-* salary
-* bonuses
-* bags
-* bins
-* marketplace
-* advertising
-* social features
-* household stops
-* permanent Rider vehicle assignment
-* collector area
-* assignment area
-* assignment status
-* fake notifications
-* fake admin profile backend
-* unrelated analytics
-
-Only support actual NEPTUNE functionality.
-
----
-
-# TEST EVERYTHING
-
-After repairs:
-
-1. Run npm install if necessary.
-2. Run TypeScript type checking.
-3. Run production build.
-4. Fix all TypeScript errors.
-5. Fix all API contract errors.
-6. Test login.
-7. Test Collector CRUD.
-8. Test Collector status.
-9. Test Rider CRUD.
-10. Test Rider status.
-11. Test Vehicle CRUD.
-12. Test Vehicle status.
-13. Test Assignment CRUD.
-14. Test Collection Request list.
-15. Test Collection Request details.
-16. Test Dashboard.
-17. Test Leaderboard.
-18. Test authentication expiry.
-19. Test API error states.
-20. Test with REAL backend data.
-
-Do not declare the task complete merely because the frontend builds.
-
----
-
-# FINAL VERIFICATION
-
-Search the frontend source for these invalid fields:
-
-* area
-* lastLogin
-* assignedVehicleId
-* assignedRiderId
-* assignmentId
-* assignment.status
-* assignment.area
-* createdDate
-* date
-
-For each occurrence, determine whether it is genuinely supported by the backend.
-
-Do not blindly remove legitimate unrelated uses of words such as `date`.
-
-The goal is to eliminate incorrect backend-domain assumptions, not blindly delete strings.
-
-Also search for:
-
-* hardcoded dates
-* mock data
-* fake success messages
-* fake API calls
-* `setTimeout` pretending to save
-* `as any`
+* `any`
 * `@ts-ignore`
+* fake data
+* fake success messages
+* hardcoded vehicle lists
 
-Remove these where they are hiding actual integration problems.
+to make the build pass.
 
 ---
 
-# FINAL REPORT
+# 🚨 FINAL CHANGE-SCOPE CHECK
 
-When finished, report:
+Before finishing, inspect the Git diff.
 
-1. All files changed.
-2. All API mismatches fixed.
-3. All fake/mocked business data removed.
-4. All incorrect frontend fields removed or corrected.
-5. All CRUD operations tested.
-6. Dashboard verified against real API data.
-7. Collection request details verified.
-8. Assignment date handling verified.
-9. Authentication verified.
-10. Production build result.
-11. Any remaining issue that is genuinely a BACKEND issue.
+The changes should be limited to the Rider vehicle assignment feature.
 
-Do not claim something works unless you actually tested it.
+There should be NO unrelated changes to:
 
-The goal is not to make the UI look correct.
+* Collector
+* QR
+* Rider QR scanning
+* Collection Requests
+* Collections
+* Assignments
+* Dashboard
+* Leaderboard
+* Authentication
+* Settings
+* Notifications
+* Vehicle CRUD
+* unrelated UI components
 
-The goal is:
+If unrelated changes were made, revert them.
 
-REAL DATABASE
-↓
-REAL BACKEND API
-↓
-CORRECT FRONTEND TYPES
-↓
-CORRECT UI
-↓
-REAL PERSISTED ADMIN OPERATIONS
+---
 
-No fake data.
-No invented fields.
-No fake success.
-No backend redesign.
+# FINAL RESULT
+
+The finished Admin Dashboard must behave like this:
+
+```text
+ADMIN
+  ↓
+VEHICLES
+  ↓
+Create "Tuk 1"
+  ↓
+RIDERS
+  ↓
+Create Rider
+  ↓
+Assigned Vehicle dropdown
+  ↓
+Tuk 1
+Tuk 2
+Bike 1
+  ↓
+Select Tuk 1
+  ↓
+Create Rider
+  ↓
+PostgreSQL stores Rider.vehicleId
+  ↓
+Rider displays "Tuk 1"
+```
+
+The existing Neptune Admin Dashboard must continue working exactly as before in every other area.
+
+Only add the Rider → Vehicle assignment feature.
+
+Do not change anything else.
