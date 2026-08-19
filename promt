@@ -1,103 +1,168 @@
-NEPTUNE ADMIN FRONTEND — ADD TOTAL COLLECTIONS DASHBOARD CARD
+NEPTUNE ADMIN FRONTEND — FIX TOTAL COLLECTIONS DASHBOARD CARD
 
-Add a Total Collections metric to the existing Admin Dashboard.
+The Admin Dashboard has a "Total Collections" card.
 
-The value MUST come from the real backend API.
+Currently it displays:
 
-Do NOT hardcode the number.
-Do NOT calculate it from currently displayed frontend records.
-Do NOT use mock data.
-
-==================================================
-DASHBOARD CARD
-==================================================
-
-Add a statistics card:
-
+—
 Total Collections
+statistics unavailable
 
-The number must represent the total number of actual records in the backend `collections` table.
+The backend developer has now added/fixed the real `totalCollections` value in the Admin Dashboard statistics API.
 
-Example:
+Connect the frontend to the ACTUAL backend response.
 
-┌─────────────────────────┐
-│ Total Collections       │
-│ 25                      │
-└─────────────────────────┘
+==================================================
+IMPORTANT
+==================================================
 
-Use the existing Neptune Dashboard card design and styling.
+Do NOT hardcode the Total Collections number.
 
-Do NOT redesign the Dashboard.
+Do NOT calculate it from:
+
+- Collection Requests
+- completed requests
+- currently displayed rows
+- frontend arrays
+- Leaderboard data
+
+The backend `totalCollections` value is the source of truth.
 
 ==================================================
 API
 ==================================================
 
-Use the existing Admin Dashboard statistics/summary API if one already exists.
+Inspect the existing Dashboard statistics API integration.
 
-The backend developer will provide the final API contract.
-
-The response will contain a field equivalent to:
+The backend response now contains:
 
 totalCollections
 
-Use the actual backend field name.
+Use the exact response field provided by the backend developer.
 
-Do NOT guess a different field.
+Do NOT guess another field name.
 
-Do NOT create fake data.
+If the existing frontend already has a Dashboard statistics type/interface, add:
+
+totalCollections
+
+to that type.
+
+Update the existing Dashboard statistics mapping so the card reads the real value.
 
 ==================================================
-REAL DATA
+CARD
 ==================================================
 
-The displayed number must come from PostgreSQL through:
+The existing card:
 
-PostgreSQL
-↓
-Backend
-↓
-Admin API
-↓
-Dashboard
+Total Collections
 
-Do NOT connect the frontend directly to Supabase.
+must display the actual number.
 
-Do NOT expose DATABASE_URL or database credentials.
+Example:
 
-Use:
+Database:
 
-VITE_API_BASE_URL
+collections = 8 records
 
-for the backend API.
+Dashboard:
+
+8
+Total Collections
+
+Do not display:
+
+—
+statistics unavailable
+
+when the API successfully returns a valid number.
+
+==================================================
+ZERO IS VALID
+==================================================
+
+This is important.
+
+If the backend returns:
+
+totalCollections: 0
+
+display:
+
+0
+
+Total Collections
+
+Do NOT interpret 0 as an error.
+
+Only show:
+
+statistics unavailable
+
+when the API actually fails or the required value is genuinely unavailable.
 
 ==================================================
 LOADING
 ==================================================
 
-While dashboard statistics are loading:
+While the Dashboard statistics API is loading:
 
-show the existing dashboard loading/skeleton state.
+use the existing loading/skeleton behavior.
 
-Do not display a fake number such as 0 unless the existing UI specifically uses 0 as its loading placeholder.
+After the API succeeds:
 
-==================================================
-ERROR
-==================================================
-
-If the statistics API fails:
-
-handle the error using the existing Dashboard error handling.
-
-Do not silently display an incorrect hardcoded value.
+display the real totalCollections value.
 
 ==================================================
-REFRESH
+ERROR HANDLING
 ==================================================
 
-When the Dashboard loads/refetches its statistics, Total Collections must use the latest backend value.
+If the Dashboard statistics API fails:
 
-Do not permanently cache the number in frontend code.
+keep the existing error handling.
+
+Do not invent a number.
+
+Do not display the old/stale number as the current value.
+
+==================================================
+REAL DATA
+==================================================
+
+The data flow must be:
+
+PostgreSQL/Supabase
+        ↓
+Backend Prisma
+        ↓
+Admin Dashboard statistics API
+        ↓
+Frontend Dashboard
+        ↓
+Total Collections card
+
+Do NOT connect the frontend directly to Supabase.
+
+Do NOT expose DATABASE_URL.
+
+Do NOT expose Supabase service-role credentials.
+
+Use VITE_API_BASE_URL for the backend.
+
+==================================================
+DO NOT CHANGE OTHER CARDS
+==================================================
+
+Do NOT break:
+
+- Total Collectors
+- Total Riders
+- Active Vehicles
+- Pending Requests
+- any other existing Dashboard statistics
+
+Only modify what is necessary to consume `totalCollections`.
 
 ==================================================
 DO NOT TOUCH
@@ -111,31 +176,47 @@ Do NOT modify:
 - Collector QR
 - Rider QR scanning
 - Flutter/mobile functionality
-- Collector management
-- Rider management
-- Vehicle management
 - Rider → Vehicle assignment
-- Reports
 - Leaderboard
+- Reports
 - Collection Requests
-- existing dashboard cards
-
-Only add the Total Collections metric and the minimum API integration required.
+- CRUD
+- authentication
 
 ==================================================
 TESTING
 ==================================================
 
-Verify:
+Test against the deployed backend.
 
-1. Dashboard loads.
-2. Total Collections card appears.
-3. Number matches the actual `collections` table.
-4. Refreshing Dashboard gets the current value.
-5. API errors are handled correctly.
-6. Existing Dashboard cards still work.
-7. TypeScript/build succeeds.
+1. Open Dashboard.
+2. Verify Total Collections displays a number.
+3. Compare it with:
 
-Do not use mock data or hardcoded numbers.
+SELECT COUNT(*) FROM collections;
 
-Inspect Git diff and make sure no unrelated functionality was changed.
+4. Verify they match.
+5. Refresh Dashboard.
+6. Verify it still displays the correct number.
+7. Test when the count is 0.
+8. Test API failure handling.
+9. Verify the other Dashboard cards still work.
+10. Run TypeScript/build checks.
+
+Do NOT use mock data.
+
+Do NOT hardcode the number.
+
+Inspect Git diff and make sure no unrelated functionality changed.
+
+Final expected behavior:
+
+Actual collections table
+        ↓
+Backend totalCollections
+        ↓
+Admin Dashboard
+        ↓
+"8 Total Collections"
+
+with the number matching the real database.
