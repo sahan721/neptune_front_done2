@@ -1,271 +1,68 @@
-NEPTUNE ADMIN FRONTEND — ADD SPECIFIC DATE TO LEADERBOARD
+Fix the Vercel production routing for the Admin frontend.
 
-Add ONE targeted feature to the existing Admin Leaderboard.
+This is a Vite + React SPA using client-side routing.
 
-The current Leaderboard has:
+When navigating inside the Admin Dashboard, routes work normally, but refreshing a nested route such as:
 
-- All Time
-- This Month
+/dashboard
+/collectors
+/riders
+/vehicles
+/assignments
+/collection-requests
+/leaderboard
+/reports
 
-Add:
+causes Vercel to return:
 
-- Specific Date
+404 NOT_FOUND
 
-The Admin must be able to select an exact date and view the leaderboard for that date.
+Fix the frontend Vercel SPA routing so all React Router routes are served through the application's index.html.
 
-==================================================
-UI
-==================================================
+Add or correctly update the Admin frontend vercel.json with the appropriate SPA rewrite:
 
-Change the existing Period selector to:
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
 
-Period
-[ All Time ▼ ]
+IMPORTANT:
 
-Options:
+This is ONLY for the Admin frontend Vercel deployment.
 
-- All Time
-- This Month
-- Specific Date
+Do NOT modify the backend Vercel configuration.
 
-When "Specific Date" is selected, display:
+Do NOT modify the API URL.
 
-Date
-[ date picker ]
+Do NOT modify authentication.
 
-Example:
+Do NOT modify QR functionality.
 
-Period:
-Specific Date
+Do NOT modify Flutter/mobile functionality.
 
-Date:
-19/08/2026
+Do NOT modify the existing React routes.
 
-Then load the leaderboard for that exact date.
+Do NOT change unrelated application functionality.
 
-==================================================
-REAL BACKEND DATA
-==================================================
+After making the change:
 
-The leaderboard MUST use the real backend API.
+1. Run the production build.
+2. Verify the build succeeds.
+3. Deploy the Admin frontend.
+4. Test opening the Admin root URL.
+5. Navigate to /dashboard.
+6. Refresh /dashboard.
+7. Navigate to /collectors and refresh.
+8. Navigate to /riders and refresh.
+9. Navigate to /vehicles and refresh.
+10. Navigate to /assignments and refresh.
+11. Navigate to /leaderboard and refresh.
+12. Navigate to /reports and refresh.
+13. Verify that every route loads instead of returning Vercel 404.
+14. Verify API calls still use VITE_API_BASE_URL.
 
-Do NOT:
-
-- use mock data
-- hardcode collectors
-- hardcode weights
-- calculate fake rankings
-- reuse stale leaderboard results
-
-When the Admin selects a date, call the actual backend Leaderboard endpoint using the final API contract provided by the backend developer.
-
-Do NOT guess the API contract.
-
-==================================================
-DATE
-==================================================
-
-Send the selected date in the backend's expected format.
-
-Preferred business-date format:
-
-YYYY-MM-DD
-
-Example:
-
-2026-08-19
-
-Do not send a JavaScript Date object directly if that can introduce timezone conversion.
-
-Do not allow:
-
-2026-08-18
-
-to be sent when the Admin selected:
-
-2026-08-19
-
-because of UTC conversion.
-
-==================================================
-LEADERBOARD RESULTS
-==================================================
-
-Keep the existing columns and ranking behavior.
-
-The leaderboard should continue showing:
-
-- Rank
-- Collector
-- Total Weight (kg)
-- Total Collections
-
-For a selected date, these values must represent ONLY collections from that date.
-
-Do not rename existing columns unnecessarily.
-
-==================================================
-EXAMPLE
-==================================================
-
-Admin selects:
-
-Specific Date
-
-2026-08-19
-
-If the database contains:
-
-Collector A:
-1.5 kg
-1.4 kg
-
-Collector B:
-1.0 kg
-
-The UI should show:
-
-1. Collector A — 2.9 kg — 2 collections
-2. Collector B — 1.0 kg — 1 collection
-
-Do not include collections from other dates.
-
-==================================================
-EMPTY STATE
-==================================================
-
-If the selected date has no collections:
-
-Show a clear message such as:
-
-"No collections found for 19 Aug 2026."
-
-Do NOT display the previous leaderboard results.
-
-Clear the old results when the date changes/loading begins if necessary.
-
-==================================================
-LOADING
-==================================================
-
-When loading the date-specific leaderboard:
-
-Show the existing loading state.
-
-Do not allow confusing stale data to remain displayed as the result of the newly selected date.
-
-==================================================
-ERROR
-==================================================
-
-If the backend returns an error:
-
-Show the actual error state.
-
-Do not show:
-
-"No collections found"
-
-when the API actually failed.
-
-Use the existing Admin error-handling pattern.
-
-==================================================
-ALL TIME AND THIS MONTH
-==================================================
-
-Do NOT break the existing options.
-
-Verify:
-
-All Time → existing behavior
-
-This Month → existing behavior
-
-Specific Date → new behavior
-
-==================================================
-DO NOT MODIFY OTHER FEATURES
-==================================================
-
-Do NOT modify:
-
-- QR
-- QR verification
-- Collector QR
-- Rider QR scanning
-- Flutter/mobile functionality
-- Rider → Vehicle assignment
-- Reports
-- CRUD
-- Collection Requests
-- Dashboard
-- Vehicles
-- Assignments
-- authentication
-
-This is ONLY a Leaderboard date-filter change.
-
-==================================================
-TESTING
-==================================================
-
-Test:
-
-1. All Time.
-2. This Month.
-3. Specific Date.
-4. Date with collections.
-5. Date with multiple collectors.
-6. Date with no collections.
-7. Change from one date to another.
-8. Verify old results are not displayed for the new date.
-9. Verify Total Weight.
-10. Verify Total Collections.
-11. Verify ranking.
-12. Verify the selected date sent to the backend is correct.
-13. Run TypeScript/build checks.
-
-Compare at least one date-specific result with the actual backend/database data.
-
-Do NOT use mock data.
-
-Do NOT hardcode results.
-
-==================================================
-IMPORTANT
-==================================================
-
-If the deployed backend does not yet support the specific-date Leaderboard API:
-
-DO NOT fake the feature.
-
-Report the exact backend API requirement to the backend developer.
-
-Do not implement client-side filtering as a substitute if the existing API does not provide the correct data.
-
-==================================================
-FINAL RESULT
-==================================================
-
-The Leaderboard should support:
-
-All Time
-This Month
-Specific Date
-
-Example:
-
-Period
-[ Specific Date ▼ ]
-
-Date
-[ 19/08/2026 ]
-
-Then:
-
-5 collectors ranked — 19 Aug 2026
-
-with real Total Weight and Total Collections calculated from real collections for that exact date.
-
-Make no unrelated changes.
+Do not make any unrelated changes.
