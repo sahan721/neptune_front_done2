@@ -1,192 +1,141 @@
-NEPTUNE ADMIN FRONTEND — ADD DELETE COLLECTION REQUEST
+NEPTUNE ADMIN FRONTEND — ADD TOTAL COLLECTIONS DASHBOARD CARD
 
-Add a real Delete option to the Admin Collection Requests section.
+Add a Total Collections metric to the existing Admin Dashboard.
 
-You are working ONLY on the Admin frontend.
+The value MUST come from the real backend API.
 
-The backend is being developed separately by another developer.
-
-==================================================
-REQUIREMENT
-==================================================
-
-The Collection Requests page currently needs a permanent Delete action.
-
-Keep all existing actions and functionality.
-
-Add:
-
-DELETE
-
-as a separate destructive action.
-
-Do NOT replace any existing status/action such as:
-
-- Accept
-- Reject
-- Complete
-- Cancel
-- Deactivate
-
-if those already exist.
-
-Delete is a separate permanent database operation.
-
-==================================================
-DELETE UI
-==================================================
-
-Add a Delete action to the appropriate Collection Request row/details UI.
-
-Use the existing Neptune UI design.
-
-Before deleting, show a confirmation dialog:
-
-"Are you sure you want to permanently delete this collection request?"
-
-Make it clear that deletion is permanent.
-
-Do NOT delete immediately without confirmation.
-
-==================================================
-REAL BACKEND
-==================================================
-
-Call the actual backend DELETE endpoint provided by the backend developer.
-
-Do NOT invent an endpoint.
-
-Expected concept:
-
-DELETE /admin/collection-requests/:id
-
-But use the final endpoint contract provided by the backend developer.
-
+Do NOT hardcode the number.
+Do NOT calculate it from currently displayed frontend records.
 Do NOT use mock data.
 
-Do NOT remove the row only from React state.
-
-The database must actually be changed by the backend.
-
 ==================================================
-SUCCESS
+DASHBOARD CARD
 ==================================================
 
-After successful deletion:
+Add a statistics card:
 
-1. Show a success message.
-2. Refresh the Collection Request list from the backend.
-3. Confirm the deleted request no longer appears.
+Total Collections
 
-Do not rely only on removing the item from local state.
+The number must represent the total number of actual records in the backend `collections` table.
 
-==================================================
-ERROR HANDLING
-==================================================
+Example:
 
-Handle:
+┌─────────────────────────┐
+│ Total Collections       │
+│ 25                      │
+└─────────────────────────┘
 
-404
-409
-401
-403
-500
+Use the existing Neptune Dashboard card design and styling.
 
-appropriately.
-
-If backend returns 409 because the Collection Request has related historical Collection data:
-
-show a clear message such as:
-
-"This collection request cannot be deleted because it has related collection history."
-
-Do NOT show a fake success message.
-
-If the backend fails:
-
-do NOT remove the row from the UI.
+Do NOT redesign the Dashboard.
 
 ==================================================
-IMPORTANT
+API
 ==================================================
 
-Do NOT delete related:
+Use the existing Admin Dashboard statistics/summary API if one already exists.
 
-- Collector
-- Rider
-- Vehicle
-- Collection
-- Daily Assignment
-- User
+The backend developer will provide the final API contract.
 
-The frontend must only request deletion of the Collection Request itself.
+The response will contain a field equivalent to:
+
+totalCollections
+
+Use the actual backend field name.
+
+Do NOT guess a different field.
+
+Do NOT create fake data.
 
 ==================================================
-QR — DO NOT TOUCH
+REAL DATA
+==================================================
+
+The displayed number must come from PostgreSQL through:
+
+PostgreSQL
+↓
+Backend
+↓
+Admin API
+↓
+Dashboard
+
+Do NOT connect the frontend directly to Supabase.
+
+Do NOT expose DATABASE_URL or database credentials.
+
+Use:
+
+VITE_API_BASE_URL
+
+for the backend API.
+
+==================================================
+LOADING
+==================================================
+
+While dashboard statistics are loading:
+
+show the existing dashboard loading/skeleton state.
+
+Do not display a fake number such as 0 unless the existing UI specifically uses 0 as its loading placeholder.
+
+==================================================
+ERROR
+==================================================
+
+If the statistics API fails:
+
+handle the error using the existing Dashboard error handling.
+
+Do not silently display an incorrect hardcoded value.
+
+==================================================
+REFRESH
+==================================================
+
+When the Dashboard loads/refetches its statistics, Total Collections must use the latest backend value.
+
+Do not permanently cache the number in frontend code.
+
+==================================================
+DO NOT TOUCH
 ==================================================
 
 Do NOT modify:
 
-- QR UI
+- QR
 - QR verification
-- QR token
+- QR tokens
 - Collector QR
 - Rider QR scanning
-- QR API calls
-- QR-related collection logic
+- Flutter/mobile functionality
+- Collector management
+- Rider management
+- Vehicle management
+- Rider → Vehicle assignment
+- Reports
+- Leaderboard
+- Collection Requests
+- existing dashboard cards
 
-==================================================
-FLUTTER / MOBILE — DO NOT TOUCH
-==================================================
-
-Do NOT modify any mobile/Flutter functionality.
-
-==================================================
-EXISTING FEATURES
-==================================================
-
-Do NOT break:
-
-- Collection Request listing
-- filtering
-- search
-- status display
-- request details
-- accept/reject
-- complete/cancel
-- pagination if present
-- existing Admin authentication
-
-Keep existing functionality unchanged.
+Only add the Total Collections metric and the minimum API integration required.
 
 ==================================================
 TESTING
 ==================================================
 
-Test:
+Verify:
 
-1. Delete confirmation appears.
-2. Cancel confirmation does not delete.
-3. Successful deletion calls real backend.
-4. Deleted request disappears after refresh.
-5. 404 is handled.
-6. 409 is handled.
-7. 401/403 are handled.
-8. 500 is handled.
-9. Existing Collection Request actions still work.
-10. TypeScript/build succeeds.
+1. Dashboard loads.
+2. Total Collections card appears.
+3. Number matches the actual `collections` table.
+4. Refreshing Dashboard gets the current value.
+5. API errors are handled correctly.
+6. Existing Dashboard cards still work.
+7. TypeScript/build succeeds.
 
-Do not use mock DELETE responses.
+Do not use mock data or hardcoded numbers.
 
-Do not fake deletion.
-
-Inspect Git diff and ensure no unrelated files/features were changed.
-
-At the end, report:
-
-- frontend files changed
-- exact DELETE endpoint used
-- success behavior
-- error handling
-- confirmation that QR was untouched
-- confirmation that Flutter/mobile was untouched
+Inspect Git diff and make sure no unrelated functionality was changed.
