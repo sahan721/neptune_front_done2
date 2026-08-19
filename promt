@@ -1,68 +1,192 @@
-Fix the Vercel production routing for the Admin frontend.
+NEPTUNE ADMIN FRONTEND — ADD DELETE COLLECTION REQUEST
 
-This is a Vite + React SPA using client-side routing.
+Add a real Delete option to the Admin Collection Requests section.
 
-When navigating inside the Admin Dashboard, routes work normally, but refreshing a nested route such as:
+You are working ONLY on the Admin frontend.
 
-/dashboard
-/collectors
-/riders
-/vehicles
-/assignments
-/collection-requests
-/leaderboard
-/reports
+The backend is being developed separately by another developer.
 
-causes Vercel to return:
+==================================================
+REQUIREMENT
+==================================================
 
-404 NOT_FOUND
+The Collection Requests page currently needs a permanent Delete action.
 
-Fix the frontend Vercel SPA routing so all React Router routes are served through the application's index.html.
+Keep all existing actions and functionality.
 
-Add or correctly update the Admin frontend vercel.json with the appropriate SPA rewrite:
+Add:
 
-{
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
-}
+DELETE
 
-IMPORTANT:
+as a separate destructive action.
 
-This is ONLY for the Admin frontend Vercel deployment.
+Do NOT replace any existing status/action such as:
 
-Do NOT modify the backend Vercel configuration.
+- Accept
+- Reject
+- Complete
+- Cancel
+- Deactivate
 
-Do NOT modify the API URL.
+if those already exist.
 
-Do NOT modify authentication.
+Delete is a separate permanent database operation.
 
-Do NOT modify QR functionality.
+==================================================
+DELETE UI
+==================================================
 
-Do NOT modify Flutter/mobile functionality.
+Add a Delete action to the appropriate Collection Request row/details UI.
 
-Do NOT modify the existing React routes.
+Use the existing Neptune UI design.
 
-Do NOT change unrelated application functionality.
+Before deleting, show a confirmation dialog:
 
-After making the change:
+"Are you sure you want to permanently delete this collection request?"
 
-1. Run the production build.
-2. Verify the build succeeds.
-3. Deploy the Admin frontend.
-4. Test opening the Admin root URL.
-5. Navigate to /dashboard.
-6. Refresh /dashboard.
-7. Navigate to /collectors and refresh.
-8. Navigate to /riders and refresh.
-9. Navigate to /vehicles and refresh.
-10. Navigate to /assignments and refresh.
-11. Navigate to /leaderboard and refresh.
-12. Navigate to /reports and refresh.
-13. Verify that every route loads instead of returning Vercel 404.
-14. Verify API calls still use VITE_API_BASE_URL.
+Make it clear that deletion is permanent.
 
-Do not make any unrelated changes.
+Do NOT delete immediately without confirmation.
+
+==================================================
+REAL BACKEND
+==================================================
+
+Call the actual backend DELETE endpoint provided by the backend developer.
+
+Do NOT invent an endpoint.
+
+Expected concept:
+
+DELETE /admin/collection-requests/:id
+
+But use the final endpoint contract provided by the backend developer.
+
+Do NOT use mock data.
+
+Do NOT remove the row only from React state.
+
+The database must actually be changed by the backend.
+
+==================================================
+SUCCESS
+==================================================
+
+After successful deletion:
+
+1. Show a success message.
+2. Refresh the Collection Request list from the backend.
+3. Confirm the deleted request no longer appears.
+
+Do not rely only on removing the item from local state.
+
+==================================================
+ERROR HANDLING
+==================================================
+
+Handle:
+
+404
+409
+401
+403
+500
+
+appropriately.
+
+If backend returns 409 because the Collection Request has related historical Collection data:
+
+show a clear message such as:
+
+"This collection request cannot be deleted because it has related collection history."
+
+Do NOT show a fake success message.
+
+If the backend fails:
+
+do NOT remove the row from the UI.
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT delete related:
+
+- Collector
+- Rider
+- Vehicle
+- Collection
+- Daily Assignment
+- User
+
+The frontend must only request deletion of the Collection Request itself.
+
+==================================================
+QR — DO NOT TOUCH
+==================================================
+
+Do NOT modify:
+
+- QR UI
+- QR verification
+- QR token
+- Collector QR
+- Rider QR scanning
+- QR API calls
+- QR-related collection logic
+
+==================================================
+FLUTTER / MOBILE — DO NOT TOUCH
+==================================================
+
+Do NOT modify any mobile/Flutter functionality.
+
+==================================================
+EXISTING FEATURES
+==================================================
+
+Do NOT break:
+
+- Collection Request listing
+- filtering
+- search
+- status display
+- request details
+- accept/reject
+- complete/cancel
+- pagination if present
+- existing Admin authentication
+
+Keep existing functionality unchanged.
+
+==================================================
+TESTING
+==================================================
+
+Test:
+
+1. Delete confirmation appears.
+2. Cancel confirmation does not delete.
+3. Successful deletion calls real backend.
+4. Deleted request disappears after refresh.
+5. 404 is handled.
+6. 409 is handled.
+7. 401/403 are handled.
+8. 500 is handled.
+9. Existing Collection Request actions still work.
+10. TypeScript/build succeeds.
+
+Do not use mock DELETE responses.
+
+Do not fake deletion.
+
+Inspect Git diff and ensure no unrelated files/features were changed.
+
+At the end, report:
+
+- frontend files changed
+- exact DELETE endpoint used
+- success behavior
+- error handling
+- confirmation that QR was untouched
+- confirmation that Flutter/mobile was untouched
