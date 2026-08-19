@@ -1,240 +1,271 @@
-NEPTUNE ADMIN FRONTEND — REMOVE WEIGHT FROM RIDER REPORT
+NEPTUNE ADMIN FRONTEND — ADD SPECIFIC DATE TO LEADERBOARD
 
-Make ONE targeted correction to the Admin Reports UI.
+Add ONE targeted feature to the existing Admin Leaderboard.
 
-The Rider Report currently displays:
+The current Leaderboard has:
 
-"TOTAL WEIGHT (KG)"
+- All Time
+- This Month
 
-This is incorrect.
+Add:
 
-REMOVE IT COMPLETELY FROM THE RIDER REPORT.
+- Specific Date
 
-Weight belongs to the Collection Report, not the Rider Report.
-
-==================================================
-RIDER REPORT
-==================================================
-
-The Rider Report should display Rider-level information such as:
-
-- Rider
-- NIC
-- Mobile
-- Address
-- Assigned Vehicle
-- Requests
-- Completed
-
-Remove:
-
-- Total Weight (kg)
-
-Do not replace it with another weight field.
-
-Do not rename it.
-
-Do not calculate it somewhere else.
-
-There must be NO weight column in the Rider Report.
+The Admin must be able to select an exact date and view the leaderboard for that date.
 
 ==================================================
-BACKEND DATA
+UI
 ==================================================
 
-The backend developer is also changing the Rider Report API so that the Rider Report no longer returns a weight field.
+Change the existing Period selector to:
 
-Therefore:
+Period
+[ All Time ▼ ]
 
-- Update the frontend Rider Report type/interface if necessary.
-- Remove weight-related mapping.
-- Remove weight-related calculations.
-- Remove weight-related table columns.
-- Remove weight-related summary values if they exist.
-- Do not expect totalWeight from the Rider Report API.
+Options:
 
-Do NOT use frontend calculations to recreate the weight.
+- All Time
+- This Month
+- Specific Date
 
-==================================================
-COLLECTION REPORT
-==================================================
+When "Specific Date" is selected, display:
 
-IMPORTANT:
-
-DO NOT remove weight from the Collection Report.
-
-The Collection Report SHOULD continue to display:
-
-- Collection ID
-- Request ID
-- Collector
-- Rider
-- Vehicle
-- Weight (kg)
-- Collected At
-
-Weight belongs there.
-
-Only remove it from the Rider Report.
-
-==================================================
-RIDER REPORT TABLE
-==================================================
-
-Change the Rider Report table from something like:
-
-RIDER
-NIC
-MOBILE
-ADDRESS
-ASSIGNED VEHICLE
-REQUESTS
-COMPLETED
-TOTAL WEIGHT (KG)
-
-to:
-
-RIDER
-NIC
-MOBILE
-ADDRESS
-ASSIGNED VEHICLE
-REQUESTS
-COMPLETED
-
-Do not add another column unless it is already supported by the actual backend response.
-
-==================================================
-RIDER EXCEL DOWNLOAD
-==================================================
-
-The Rider Report Excel download must also NOT contain weight.
-
-Remove:
-
-- Total Weight
-- Total Weight (kg)
-- weightKg
-- totalWeight
-- weight
-
-from the Rider Excel export.
-
-The Excel columns must match the displayed Rider Report.
+Date
+[ date picker ]
 
 Example:
 
-Rider
-NIC
-Mobile
-Address
-Assigned Vehicle
-Requests
-Completed
+Period:
+Specific Date
 
-No weight column.
+Date:
+19/08/2026
+
+Then load the leaderboard for that exact date.
 
 ==================================================
-REPORT FILTERS
+REAL BACKEND DATA
 ==================================================
 
-Keep the existing valid Rider Report filters.
+The leaderboard MUST use the real backend API.
 
-Do not remove:
+Do NOT:
 
-- date range
-- Rider filter
+- use mock data
+- hardcode collectors
+- hardcode weights
+- calculate fake rankings
+- reuse stale leaderboard results
 
-unless the backend no longer supports them.
+When the Admin selects a date, call the actual backend Leaderboard endpoint using the final API contract provided by the backend developer.
 
-Do not invent new filters.
-
-After applying filters, the Rider Report must still display real backend data.
-
-==================================================
-REAL DATA
-==================================================
-
-Do NOT replace anything with mock data.
-
-Do NOT hardcode report values.
-
-Do NOT calculate weight on the frontend.
-
-Use the actual backend Rider Report response.
-
-If the backend response still contains a weight field after the backend developer's change, do NOT silently use it.
-
-Report the mismatch instead.
+Do NOT guess the API contract.
 
 ==================================================
-DO NOT MODIFY OTHER REPORTS
+DATE
+==================================================
+
+Send the selected date in the backend's expected format.
+
+Preferred business-date format:
+
+YYYY-MM-DD
+
+Example:
+
+2026-08-19
+
+Do not send a JavaScript Date object directly if that can introduce timezone conversion.
+
+Do not allow:
+
+2026-08-18
+
+to be sent when the Admin selected:
+
+2026-08-19
+
+because of UTC conversion.
+
+==================================================
+LEADERBOARD RESULTS
+==================================================
+
+Keep the existing columns and ranking behavior.
+
+The leaderboard should continue showing:
+
+- Rank
+- Collector
+- Total Weight (kg)
+- Total Collections
+
+For a selected date, these values must represent ONLY collections from that date.
+
+Do not rename existing columns unnecessarily.
+
+==================================================
+EXAMPLE
+==================================================
+
+Admin selects:
+
+Specific Date
+
+2026-08-19
+
+If the database contains:
+
+Collector A:
+1.5 kg
+1.4 kg
+
+Collector B:
+1.0 kg
+
+The UI should show:
+
+1. Collector A — 2.9 kg — 2 collections
+2. Collector B — 1.0 kg — 1 collection
+
+Do not include collections from other dates.
+
+==================================================
+EMPTY STATE
+==================================================
+
+If the selected date has no collections:
+
+Show a clear message such as:
+
+"No collections found for 19 Aug 2026."
+
+Do NOT display the previous leaderboard results.
+
+Clear the old results when the date changes/loading begins if necessary.
+
+==================================================
+LOADING
+==================================================
+
+When loading the date-specific leaderboard:
+
+Show the existing loading state.
+
+Do not allow confusing stale data to remain displayed as the result of the newly selected date.
+
+==================================================
+ERROR
+==================================================
+
+If the backend returns an error:
+
+Show the actual error state.
+
+Do not show:
+
+"No collections found"
+
+when the API actually failed.
+
+Use the existing Admin error-handling pattern.
+
+==================================================
+ALL TIME AND THIS MONTH
+==================================================
+
+Do NOT break the existing options.
+
+Verify:
+
+All Time → existing behavior
+
+This Month → existing behavior
+
+Specific Date → new behavior
+
+==================================================
+DO NOT MODIFY OTHER FEATURES
 ==================================================
 
 Do NOT modify:
 
-- Collection Report
-- Collection Request Report
-- Collector Report
-- Vehicle Report
-- Assignment Report
-
-unless absolutely necessary to prevent a type/build error.
-
-The Collection Report MUST continue showing weight.
-
-==================================================
-DO NOT TOUCH OTHER FEATURES
-==================================================
-
-Do NOT modify:
-
-- Rider CRUD
+- QR
+- QR verification
+- Collector QR
+- Rider QR scanning
+- Flutter/mobile functionality
 - Rider → Vehicle assignment
-- Collector management
-- Vehicle management
-- Assignments
+- Reports
+- CRUD
 - Collection Requests
 - Dashboard
+- Vehicles
+- Assignments
 - authentication
-- QR
-- Flutter/mobile functionality
-- Deactivate/Activate
-- Delete functionality
 
-This is ONLY a Rider Report correction.
+This is ONLY a Leaderboard date-filter change.
 
 ==================================================
 TESTING
 ==================================================
 
-After implementation:
+Test:
 
-1. Open Rider Report.
-2. Verify Total Weight column is gone.
-3. Generate Rider Report.
-4. Verify Rider data is real.
-5. Verify Requests count is real.
-6. Verify Completed count is real.
-7. Verify Assigned Vehicle is real.
-8. Apply Rider filter.
-9. Apply date filter.
-10. Verify filtered results are correct.
-11. Download Rider Excel.
-12. Open the Excel file.
-13. Verify Excel contains NO weight column.
-14. Open Collection Report.
-15. Verify Collection Report STILL contains Weight (kg).
-16. Run TypeScript/build checks.
+1. All Time.
+2. This Month.
+3. Specific Date.
+4. Date with collections.
+5. Date with multiple collectors.
+6. Date with no collections.
+7. Change from one date to another.
+8. Verify old results are not displayed for the new date.
+9. Verify Total Weight.
+10. Verify Total Collections.
+11. Verify ranking.
+12. Verify the selected date sent to the backend is correct.
+13. Run TypeScript/build checks.
 
-The final result must be:
+Compare at least one date-specific result with the actual backend/database data.
 
-RIDER REPORT
-→ No weight
+Do NOT use mock data.
 
-COLLECTION REPORT
-→ Weight remains
+Do NOT hardcode results.
 
-Do not change anything else.
+==================================================
+IMPORTANT
+==================================================
 
-At the end, report the exact frontend files changed and confirm that the Collection Report's weight functionality was preserved.
+If the deployed backend does not yet support the specific-date Leaderboard API:
+
+DO NOT fake the feature.
+
+Report the exact backend API requirement to the backend developer.
+
+Do not implement client-side filtering as a substitute if the existing API does not provide the correct data.
+
+==================================================
+FINAL RESULT
+==================================================
+
+The Leaderboard should support:
+
+All Time
+This Month
+Specific Date
+
+Example:
+
+Period
+[ Specific Date ▼ ]
+
+Date
+[ 19/08/2026 ]
+
+Then:
+
+5 collectors ranked — 19 Aug 2026
+
+with real Total Weight and Total Collections calculated from real collections for that exact date.
+
+Make no unrelated changes.
