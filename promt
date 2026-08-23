@@ -1,58 +1,47 @@
-URGENT: Fix the Leaderboard Specific Date white-screen error.
+Fix the Admin Leaderboard frontend integration.
 
-Current behavior:
-- Leaderboard works normally for All Time.
-- When I select a Specific Date, the whole page becomes a blank white screen.
-- This must be fixed.
+DO NOT change any database data or backend logic.
 
-IMPORTANT:
-Do not change unrelated UI or redesign the leaderboard.
+Current situation:
+- The backend should return existing leaderboard data again.
+- The frontend must correctly display the returned data.
 
 Requirements:
 
-1. Selecting a specific date must NEVER cause the whole React page to crash or become blank.
-2. Check the browser console/runtime errors and identify the exact line causing the crash.
-3. Add proper loading, error, and empty-state handling.
-4. The date picker must send the selected date to the backend in YYYY-MM-DD format.
-5. Use the date-specific leaderboard API contract:
-   GET /admin/leaderboard?date=YYYY-MM-DD
-   Example:
-   GET /admin/leaderboard?date=2026-08-24
+1. All Time must display all data returned by the backend.
+2. This Month must display current-month data.
+3. Specific Date must send the selected date to the API.
+4. Do not show "No records found" when valid API data exists.
+5. Inspect the actual API response in the browser Network tab before mapping the response.
+6. Fix any mismatch between the backend response structure and frontend code.
 
-6. When the user selects a date:
-   - Call the API with the date query parameter.
-   - Do NOT continue displaying the previous All Time data.
-   - Replace the leaderboard data with only the data returned for that selected date.
+Safely handle possible responses:
+- []
+- { data: [] }
+- { leaderboard: [] }
+- valid populated responses
 
-7. If no data exists for the selected date:
-   - Show a proper message such as:
-     "No leaderboard data available for this date."
-   - Do NOT show All Time data.
-   - Do NOT crash.
+Do not assume the response array is always at one specific property without checking the real API response.
 
-8. If the backend returns an error:
-   - Show a visible error message.
-   - Do NOT render a blank white screen.
+For Specific Date:
+- Send the selected date as YYYY-MM-DD.
+- Do not convert the date incorrectly because of timezone issues.
+- Do not use the browser's UTC conversion if it changes the selected calendar day.
 
-9. Safely handle:
-   - null response
-   - undefined response
-   - empty array
-   - missing leaderboard fields
-   - API/network errors
+Example:
+Selected date in UI: 23 Aug 2026
+API request must use:
+2026-08-23
 
-10. Do not assume that data[0] exists.
-    Do not use .map(), .reduce(), or other operations on undefined values.
+If the API returns data:
+- Display the leaderboard.
 
-11. Keep the existing All Time and This Month functionality working.
+If the API returns an empty array:
+- Display the existing empty-state message.
 
-12. Add an error boundary or equivalent protection so an unexpected component error does not destroy the entire page.
+If the API fails:
+- Display an error message instead of a blank page.
 
-After fixing:
-- Test All Time.
-- Test This Month.
-- Test a date with data.
-- Test a date with no data, including tomorrow.
-- Confirm tomorrow shows an empty-state message instead of a white screen.
-
-Do not modify backend code. Only fix the Admin frontend integration and UI error handling.
+Do not redesign the UI.
+Do not remove existing features.
+Do not modify database data.
