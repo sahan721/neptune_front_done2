@@ -1,77 +1,68 @@
-Implement ONLY the frontend changes required to make the Admin Leaderboard correctly show data for a selected specific date.
+Fix the existing Leaderboard date filtering in the frontend. Do not redesign or change unrelated functionality.
 
-Problem:
-The Leaderboard already has a Specific Date option and date picker, but selecting a date still shows all-time data. The frontend must send the selected date correctly to the real backend API and display only the returned data.
+CURRENT BUG:
+When the admin selects a specific date, the leaderboard still displays all-time/historical data. Even when selecting tomorrow or another future date with no data, it still shows existing leaderboard records.
 
-Requirements:
+REQUIRED BEHAVIOR:
 
-1. Inspect the existing Leaderboard page and its current API request logic before making changes.
+1. Keep the existing leaderboard UI and existing All Time / This Month options.
 
-2. Keep the existing period options:
-   - All Time
-   - This Month
-   - Specific Date
-
-3. When All Time is selected:
-   - Use the existing all-time leaderboard API behavior.
-
-4. When This Month is selected:
-   - Use the existing monthly leaderboard API behavior.
-
-5. When Specific Date is selected:
+2. When the admin selects "Specific Date":
    - Show the date picker.
-   - Require a date before fetching data.
-   - Send the selected date to the backend in exactly this format:
-     YYYY-MM-DD
+   - Require/select a date.
+   - Send the selected date to the real backend API.
 
-   Example:
-   /admin/leaderboard?date=2026-08-19
+3. Use the exact API request:
+   GET /admin/leaderboard?date=YYYY-MM-DD
 
-6. Do NOT perform client-side fake filtering if the backend is supposed to filter the data.
-   The frontend must request the correct filtered data from the backend.
+Use the selected date in the correct YYYY-MM-DD format.
 
-7. When the user changes the date:
-   - Refetch the leaderboard using the newly selected date.
-   - Replace the old leaderboard results.
-   - Do not leave previous all-time data visible.
+4. When the selected date changes:
+   - Fetch new data for that date.
+   - Replace the currently displayed leaderboard data.
+   - Do NOT keep old data visible as the new result.
 
-8. Add proper states:
-   - Loading
-   - Error
-   - Empty state when there are no collections for the selected date
+5. CRITICAL:
+   - Do NOT fall back to All Time data if the selected date has no results.
+   - Do NOT automatically call the all-time endpoint when a date-specific request returns an empty array.
+   - Do NOT silently remove the date parameter.
+   - Do NOT use cached all-time data as a fallback.
 
-9. The displayed values must come directly from the backend response:
-   - Rank
-   - Collector
-   - Total Weight
-   - Total Collections
+6. If the backend returns no data for the selected date:
+   - Clear the leaderboard rows.
+   - Show a proper empty state:
+     "No leaderboard data available for this date."
 
-10. Do not mix data from different periods.
-    A selected date must never display cached all-time or monthly results.
+7. Example:
+   If today has data and the admin selects tomorrow:
+   - The existing today's/all-time records must disappear.
+   - The leaderboard must show the empty state.
+   - It must NOT show old records.
 
-11. Preserve the existing leaderboard design and styling as much as possible.
+8. Preserve existing behavior:
+   - All Time → fetch/display all-time data.
+   - This Month → fetch/display only current-month data.
+   - Specific Date → fetch/display only that exact date's data.
 
-12. Do not modify unrelated pages or functionality.
+9. Add proper loading and error states.
 
-CRITICAL:
-- Do not change the backend.
-- Do not invent fake data.
-- Do not hardcode leaderboard values.
-- Do not change QR-related functionality.
-- Do not modify Flutter/mobile app related functionality.
-- Do not modify unrelated admin features.
+10. Ensure the date-specific API request uses the real deployed backend URL and existing API configuration.
 
-Before finishing:
-- Verify All Time works
-- Verify This Month works
-- Verify Specific Date sends the date in YYYY-MM-DD format
-- Verify changing the date updates the API request
-- Verify the results displayed correspond only to the selected date
-- Verify an empty date result shows a proper empty state
-- Run the frontend build/check and fix only errors caused by these changes
+IMPORTANT:
+Do not use mock data.
+Do not hardcode results.
+Do not fall back to previous leaderboard data.
+When the date changes, the displayed data must always match the currently selected filter.
 
-At the end, clearly report:
-1. Which frontend file(s) were changed
-2. The exact API URL used for Specific Date
-3. How the selected date is formatted
-4. How the page refreshes when the user changes the date
+After implementation, test:
+- All Time.
+- This Month.
+- A date containing data.
+- Tomorrow/future date containing no data.
+- Switching repeatedly between filters.
+
+Verify that selecting tomorrow with no records shows:
+"No leaderboard data available for this date."
+and NOT all historical leaderboard data.
+
+Run the frontend build and fix all errors.
