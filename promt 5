@@ -1,0 +1,111 @@
+Implement the following feature in the existing Admin Dashboard frontend. Do not redesign or modify unrelated functionality.
+
+FEATURE: University Management + Daily University Distribution Circular Chart
+
+There is currently empty white space in the Admin Dashboard. Use this space to add a new attractive dashboard component.
+
+PART 1: UNIVERSITY MANAGEMENT
+
+Add a clear University Management area where the admin can dynamically manage university names.
+
+The admin must be able to:
+
+- Add a new university
+- View existing universities
+- Edit a university name
+- Delete a university where the backend allows deletion
+
+University names must NOT be hardcoded.
+
+Example universities:
+- Peradeniya
+- AIBT
+- APIIT
+
+These are only examples. The admin must be able to add any new university dynamically.
+
+Use the real backend API for all university CRUD operations.
+
+Do not use mock or hardcoded university data.
+
+PART 2: DAILY UNIVERSITY DISTRIBUTION COMPONENT
+
+In the empty dashboard space, add a modern and attractive circular/donut-style chart.
+
+IMPORTANT:
+This must NOT be a normal pie chart.
+
+Use a visually attractive circular chart with colored segments or circular progress visualization.
+
+The component should display the percentage distribution of universities for a specific date.
+
+Example:
+
+Peradeniya → 40%
+AIBT → 35%
+APIIT → 25%
+
+The component should include:
+
+- A title such as "University Distribution"
+- A date selector
+- A circular/donut visualization
+- University names
+- Percentages
+- A clear legend or labels
+- A total count if useful
+
+DATE BEHAVIOR:
+
+- By default, show today's data.
+- The admin must be able to select another specific date.
+- When the date changes, fetch new data from the backend.
+- The chart must update automatically.
+- Do not display all-time data when a specific date is selected.
+
+Fetch data from the real backend endpoint:
+
+GET /admin/university-distribution?date=YYYY-MM-DD
+
+Use the actual deployed backend API base URL already configured in the project.
+
+DATA REQUIREMENTS:
+
+- No hardcoded percentages.
+- No mock data.
+- Calculate/display using the real data returned by the backend.
+- If no data exists for the selected date, show a proper empty state such as:
+  "No university distribution data available for this date."
+
+CHART DESIGN:
+
+- Attractive modern circular design.
+- Responsive.
+- Fits naturally into the existing dashboard.
+- Must not break or overcrowd the current layout.
+- University names should be readable.
+- Use tooltips if needed to show exact percentages and counts.
+- Do not replace or break existing dashboard components.
+
+ERROR HANDLING:
+
+- Show a proper loading state while fetching.
+- Show a user-friendly error message if the API fails.
+- Handle empty data correctly.
+- Do not crash the dashboard.
+
+IMPORTANT:
+Do not modify existing working dashboard features.
+Do not remove existing dashboard components.
+Only add the University Management functionality and the new University Distribution circular chart.
+
+After implementation:
+1. Verify universities can be added through the admin UI.
+2. Verify the university list loads from the real backend.
+3. Verify edit/delete works according to backend permissions.
+4. Verify today's distribution loads automatically.
+5. Verify selecting another date fetches the correct date-specific data.
+6. Verify the circular chart updates correctly.
+7. Verify percentages match backend data.
+8. Verify empty and error states.
+9. Run the frontend build and fix all errors.
