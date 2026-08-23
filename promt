@@ -1,68 +1,58 @@
-Fix the existing Leaderboard date filtering in the frontend. Do not redesign or change unrelated functionality.
+URGENT: Fix the Leaderboard Specific Date white-screen error.
 
-CURRENT BUG:
-When the admin selects a specific date, the leaderboard still displays all-time/historical data. Even when selecting tomorrow or another future date with no data, it still shows existing leaderboard records.
-
-REQUIRED BEHAVIOR:
-
-1. Keep the existing leaderboard UI and existing All Time / This Month options.
-
-2. When the admin selects "Specific Date":
-   - Show the date picker.
-   - Require/select a date.
-   - Send the selected date to the real backend API.
-
-3. Use the exact API request:
-   GET /admin/leaderboard?date=YYYY-MM-DD
-
-Use the selected date in the correct YYYY-MM-DD format.
-
-4. When the selected date changes:
-   - Fetch new data for that date.
-   - Replace the currently displayed leaderboard data.
-   - Do NOT keep old data visible as the new result.
-
-5. CRITICAL:
-   - Do NOT fall back to All Time data if the selected date has no results.
-   - Do NOT automatically call the all-time endpoint when a date-specific request returns an empty array.
-   - Do NOT silently remove the date parameter.
-   - Do NOT use cached all-time data as a fallback.
-
-6. If the backend returns no data for the selected date:
-   - Clear the leaderboard rows.
-   - Show a proper empty state:
-     "No leaderboard data available for this date."
-
-7. Example:
-   If today has data and the admin selects tomorrow:
-   - The existing today's/all-time records must disappear.
-   - The leaderboard must show the empty state.
-   - It must NOT show old records.
-
-8. Preserve existing behavior:
-   - All Time → fetch/display all-time data.
-   - This Month → fetch/display only current-month data.
-   - Specific Date → fetch/display only that exact date's data.
-
-9. Add proper loading and error states.
-
-10. Ensure the date-specific API request uses the real deployed backend URL and existing API configuration.
+Current behavior:
+- Leaderboard works normally for All Time.
+- When I select a Specific Date, the whole page becomes a blank white screen.
+- This must be fixed.
 
 IMPORTANT:
-Do not use mock data.
-Do not hardcode results.
-Do not fall back to previous leaderboard data.
-When the date changes, the displayed data must always match the currently selected filter.
+Do not change unrelated UI or redesign the leaderboard.
 
-After implementation, test:
-- All Time.
-- This Month.
-- A date containing data.
-- Tomorrow/future date containing no data.
-- Switching repeatedly between filters.
+Requirements:
 
-Verify that selecting tomorrow with no records shows:
-"No leaderboard data available for this date."
-and NOT all historical leaderboard data.
+1. Selecting a specific date must NEVER cause the whole React page to crash or become blank.
+2. Check the browser console/runtime errors and identify the exact line causing the crash.
+3. Add proper loading, error, and empty-state handling.
+4. The date picker must send the selected date to the backend in YYYY-MM-DD format.
+5. Use the date-specific leaderboard API contract:
+   GET /admin/leaderboard?date=YYYY-MM-DD
+   Example:
+   GET /admin/leaderboard?date=2026-08-24
 
-Run the frontend build and fix all errors.
+6. When the user selects a date:
+   - Call the API with the date query parameter.
+   - Do NOT continue displaying the previous All Time data.
+   - Replace the leaderboard data with only the data returned for that selected date.
+
+7. If no data exists for the selected date:
+   - Show a proper message such as:
+     "No leaderboard data available for this date."
+   - Do NOT show All Time data.
+   - Do NOT crash.
+
+8. If the backend returns an error:
+   - Show a visible error message.
+   - Do NOT render a blank white screen.
+
+9. Safely handle:
+   - null response
+   - undefined response
+   - empty array
+   - missing leaderboard fields
+   - API/network errors
+
+10. Do not assume that data[0] exists.
+    Do not use .map(), .reduce(), or other operations on undefined values.
+
+11. Keep the existing All Time and This Month functionality working.
+
+12. Add an error boundary or equivalent protection so an unexpected component error does not destroy the entire page.
+
+After fixing:
+- Test All Time.
+- Test This Month.
+- Test a date with data.
+- Test a date with no data, including tomorrow.
+- Confirm tomorrow shows an empty-state message instead of a white screen.
+
+Do not modify backend code. Only fix the Admin frontend integration and UI error handling.
