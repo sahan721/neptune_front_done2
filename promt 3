@@ -1,0 +1,68 @@
+total kg on dashboard
+
+Update ONLY the Admin Dashboard frontend. Do not redesign, remove, or modify any other existing dashboard functionality.
+
+TASK:
+Replace the existing "Pending Requests" dashboard statistics card with a new card called:
+
+Total Weight Collected
+
+The card must display the total weight collected from the real backend data.
+
+REQUIREMENTS:
+
+1. Remove only the existing "Pending Requests" statistics card from the Admin Dashboard.
+
+2. Add a new statistics card in the exact same position and keep the existing dashboard design, card size, spacing, typography, colors, and responsive behavior consistent with the other dashboard cards.
+
+3. The new card should display:
+   - Main label: "Total Weight Collected"
+   - Main value: total collected weight in kilograms
+   - Example format: "125.6 kg"
+   - A suitable subtitle such as "all recorded collections"
+
+4. Use REAL data only.
+   - Do NOT use hardcoded values.
+   - Do NOT calculate from mock data.
+   - Fetch the total collected weight from the existing backend API if the required value is already available.
+   - If the existing dashboard API already returns a total weight value, use that value directly.
+   - If the backend does not currently provide a total collected weight field or endpoint, do not invent or fake an API. Report the exact missing backend requirement separately.
+
+5. Only completed/recorded collections with actual collection weight must be included in the total.
+   - Pending requests must not contribute weight.
+   - Accepted requests must not contribute weight.
+   - Cancelled requests must not contribute weight.
+   - Do not treat missing/null weight as 0 unless the backend data semantics clearly require it.
+   - Display the final value using the same weight units and conversion rules used elsewhere in the system.
+
+6. The value should automatically update whenever the dashboard data is refreshed.
+
+7. Add proper loading, error, and empty-data handling without breaking the dashboard.
+
+8. Keep all other existing dashboard cards unchanged:
+   - Total Collectors
+   - Total Riders
+   - Active Vehicles
+   - Total Collections
+
+9. Do not change:
+   - Backend code
+   - Database schema
+   - API contracts
+   - Other dashboard sections
+   - Sidebar
+   - Collection activity
+   - Today's assignments
+   - Recent activity
+   - Existing navigation
+   - Authentication
+   - Existing working features
+
+10. First inspect the current frontend API service, dashboard data types, and existing dashboard components before making changes. Reuse the existing API/data-fetching structure instead of creating duplicate requests unnecessarily.
+
+After implementation:
+- Run the frontend build.
+- Fix any TypeScript errors.
+- Verify the Total Weight Collected card uses real backend data.
+- Do not make unrelated changes.
+- If backend support is missing, clearly state the exact endpoint/field required instead of using fake data.
