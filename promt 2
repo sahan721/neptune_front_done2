@@ -1,0 +1,174 @@
+g , kg 
+
+NEPTUNE COLLECTOR FRONTEND — ADD KG + GRAMS WEIGHT ENTRY
+
+Improve the weight entry UI in the Collector collection workflow.
+
+CURRENT PROBLEM:
+
+Collectors are making mistakes when entering collected weight as one decimal number.
+
+For example, entering:
+
+2.5
+2.750
+2500
+
+can cause confusion.
+
+==================================================
+NEW WEIGHT INPUT
+==================================================
+
+Replace the current single weight input with two separate fields:
+
+Weight Collected
+
+[ Kilograms ] kg    [ Grams ] g
+
+Example:
+
+[ 2 ] kg    [ 750 ] g
+
+Total: 2.750 kg
+
+The UI must clearly show which field is kilograms and which is grams.
+
+==================================================
+VALIDATION
+==================================================
+
+Kilograms:
+
+- whole numbers only
+- minimum 0
+- no negative values
+- no decimal values
+
+Grams:
+
+- whole numbers only
+- minimum 0
+- maximum 999
+- no negative values
+- no decimal values
+
+The following is invalid:
+
+0 kg + 0 g
+
+because total weight cannot be zero.
+
+==================================================
+CONVERSION
+==================================================
+
+Automatically calculate:
+
+totalWeightKg = kilograms + (grams / 1000)
+
+Examples:
+
+2 kg + 750 g
+= 2.750 kg
+
+0 kg + 500 g
+= 0.500 kg
+
+2 kg + 5 g
+= 2.005 kg
+
+2 kg + 50 g
+= 2.050 kg
+
+5 kg + 0 g
+= 5.000 kg
+
+Update the displayed total immediately when either input changes.
+
+Avoid floating-point display errors.
+
+==================================================
+BACKEND INTEGRATION
+==================================================
+
+The backend continues using its existing single weight field.
+
+Send the calculated value using the existing API contract.
+
+Conceptually:
+
+2 kg + 750 g
+
+becomes:
+
+weightKg: 2.75
+
+Do NOT send separate kg and grams fields unless the deployed backend explicitly requires them.
+
+Do NOT modify backend API configuration from this frontend project.
+
+==================================================
+ERROR HANDLING
+==================================================
+
+Show clear errors:
+
+For zero total:
+
+"Please enter a weight greater than 0."
+
+For invalid grams:
+
+"Grams must be between 0 and 999."
+
+Do not submit invalid values.
+
+==================================================
+PRESERVE EVERYTHING ELSE
+==================================================
+
+Only change the weight input and calculation logic.
+
+DO NOT modify:
+
+- QR functionality
+- QR scanning
+- QR verification
+- authentication
+- collection request workflow
+- collection status workflow
+- location capture
+- Collector profile
+- Rider functionality
+- Admin functionality
+- API endpoints
+- backend configuration
+
+==================================================
+TESTING
+==================================================
+
+Test:
+
+1. 2 kg + 750 g → backend receives 2.75
+2. 0 kg + 500 g → backend receives 0.5
+3. 5 kg + 0 g → backend receives 5
+4. 2 kg + 5 g → backend receives 2.005
+5. 2 kg + 50 g → backend receives 2.05
+6. 0 kg + 0 g → rejected
+7. 2 kg + 1000 g → rejected
+8. Negative values → rejected
+9. Confirm the displayed total is correct.
+10. Confirm the existing collection submission still works.
+
+Run the application build/check.
+
+At the end report:
+
+1. Files changed.
+2. How kg and grams are converted.
+3. Exact value sent to the backend.
+4. Validation rules.
+5. Tests performed.
+6. Confirmation that unrelated functionality was untouched.
