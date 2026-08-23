@@ -1,222 +1,77 @@
-NEPTUNE ADMIN FRONTEND — FIX TOTAL COLLECTIONS DASHBOARD CARD
-
-The Admin Dashboard has a "Total Collections" card.
-
-Currently it displays:
-
-—
-Total Collections
-statistics unavailable
-
-The backend developer has now added/fixed the real `totalCollections` value in the Admin Dashboard statistics API.
-
-Connect the frontend to the ACTUAL backend response.
-
-==================================================
-IMPORTANT
-==================================================
-
-Do NOT hardcode the Total Collections number.
-
-Do NOT calculate it from:
-
-- Collection Requests
-- completed requests
-- currently displayed rows
-- frontend arrays
-- Leaderboard data
-
-The backend `totalCollections` value is the source of truth.
-
-==================================================
-API
-==================================================
-
-Inspect the existing Dashboard statistics API integration.
-
-The backend response now contains:
-
-totalCollections
-
-Use the exact response field provided by the backend developer.
-
-Do NOT guess another field name.
-
-If the existing frontend already has a Dashboard statistics type/interface, add:
-
-totalCollections
-
-to that type.
-
-Update the existing Dashboard statistics mapping so the card reads the real value.
-
-==================================================
-CARD
-==================================================
-
-The existing card:
-
-Total Collections
-
-must display the actual number.
-
-Example:
-
-Database:
-
-collections = 8 records
-
-Dashboard:
-
-8
-Total Collections
-
-Do not display:
-
-—
-statistics unavailable
-
-when the API successfully returns a valid number.
-
-==================================================
-ZERO IS VALID
-==================================================
-
-This is important.
-
-If the backend returns:
-
-totalCollections: 0
-
-display:
-
-0
-
-Total Collections
-
-Do NOT interpret 0 as an error.
-
-Only show:
-
-statistics unavailable
-
-when the API actually fails or the required value is genuinely unavailable.
-
-==================================================
-LOADING
-==================================================
-
-While the Dashboard statistics API is loading:
-
-use the existing loading/skeleton behavior.
-
-After the API succeeds:
-
-display the real totalCollections value.
-
-==================================================
-ERROR HANDLING
-==================================================
-
-If the Dashboard statistics API fails:
-
-keep the existing error handling.
-
-Do not invent a number.
-
-Do not display the old/stale number as the current value.
-
-==================================================
-REAL DATA
-==================================================
-
-The data flow must be:
-
-PostgreSQL/Supabase
-        ↓
-Backend Prisma
-        ↓
-Admin Dashboard statistics API
-        ↓
-Frontend Dashboard
-        ↓
-Total Collections card
-
-Do NOT connect the frontend directly to Supabase.
-
-Do NOT expose DATABASE_URL.
-
-Do NOT expose Supabase service-role credentials.
-
-Use VITE_API_BASE_URL for the backend.
-
-==================================================
-DO NOT CHANGE OTHER CARDS
-==================================================
-
-Do NOT break:
-
-- Total Collectors
-- Total Riders
-- Active Vehicles
-- Pending Requests
-- any other existing Dashboard statistics
-
-Only modify what is necessary to consume `totalCollections`.
-
-==================================================
-DO NOT TOUCH
-==================================================
-
-Do NOT modify:
-
-- QR
-- QR verification
-- QR tokens
-- Collector QR
-- Rider QR scanning
-- Flutter/mobile functionality
-- Rider → Vehicle assignment
-- Leaderboard
-- Reports
-- Collection Requests
-- CRUD
-- authentication
-
-==================================================
-TESTING
-==================================================
-
-Test against the deployed backend.
-
-1. Open Dashboard.
-2. Verify Total Collections displays a number.
-3. Compare it with:
-
-SELECT COUNT(*) FROM collections;
-
-4. Verify they match.
-5. Refresh Dashboard.
-6. Verify it still displays the correct number.
-7. Test when the count is 0.
-8. Test API failure handling.
-9. Verify the other Dashboard cards still work.
-10. Run TypeScript/build checks.
-
-Do NOT use mock data.
-
-Do NOT hardcode the number.
-
-Inspect Git diff and make sure no unrelated functionality changed.
-
-Final expected behavior:
-
-Actual collections table
-        ↓
-Backend totalCollections
-        ↓
-Admin Dashboard
-        ↓
-"8 Total Collections"
-
-with the number matching the real database.
+Implement ONLY the frontend changes required to make the Admin Leaderboard correctly show data for a selected specific date.
+
+Problem:
+The Leaderboard already has a Specific Date option and date picker, but selecting a date still shows all-time data. The frontend must send the selected date correctly to the real backend API and display only the returned data.
+
+Requirements:
+
+1. Inspect the existing Leaderboard page and its current API request logic before making changes.
+
+2. Keep the existing period options:
+   - All Time
+   - This Month
+   - Specific Date
+
+3. When All Time is selected:
+   - Use the existing all-time leaderboard API behavior.
+
+4. When This Month is selected:
+   - Use the existing monthly leaderboard API behavior.
+
+5. When Specific Date is selected:
+   - Show the date picker.
+   - Require a date before fetching data.
+   - Send the selected date to the backend in exactly this format:
+     YYYY-MM-DD
+
+   Example:
+   /admin/leaderboard?date=2026-08-19
+
+6. Do NOT perform client-side fake filtering if the backend is supposed to filter the data.
+   The frontend must request the correct filtered data from the backend.
+
+7. When the user changes the date:
+   - Refetch the leaderboard using the newly selected date.
+   - Replace the old leaderboard results.
+   - Do not leave previous all-time data visible.
+
+8. Add proper states:
+   - Loading
+   - Error
+   - Empty state when there are no collections for the selected date
+
+9. The displayed values must come directly from the backend response:
+   - Rank
+   - Collector
+   - Total Weight
+   - Total Collections
+
+10. Do not mix data from different periods.
+    A selected date must never display cached all-time or monthly results.
+
+11. Preserve the existing leaderboard design and styling as much as possible.
+
+12. Do not modify unrelated pages or functionality.
+
+CRITICAL:
+- Do not change the backend.
+- Do not invent fake data.
+- Do not hardcode leaderboard values.
+- Do not change QR-related functionality.
+- Do not modify Flutter/mobile app related functionality.
+- Do not modify unrelated admin features.
+
+Before finishing:
+- Verify All Time works
+- Verify This Month works
+- Verify Specific Date sends the date in YYYY-MM-DD format
+- Verify changing the date updates the API request
+- Verify the results displayed correspond only to the selected date
+- Verify an empty date result shows a proper empty state
+- Run the frontend build/check and fix only errors caused by these changes
+
+At the end, clearly report:
+1. Which frontend file(s) were changed
+2. The exact API URL used for Specific Date
+3. How the selected date is formatted
+4. How the page refreshes when the user changes the date
