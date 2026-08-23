@@ -1,0 +1,47 @@
+deactive login
+
+Implement the following change carefully in the existing frontend. Do not redesign or modify unrelated UI or functionality.
+
+BACKEND BEHAVIOR:
+A deactivated Collector or Rider can still log in and use the application, including viewing the leaderboard and updating their profile.
+
+A deactivated user is only restricted from performing collection-request-related operational actions.
+
+REQUIRED FRONTEND BEHAVIOR:
+
+1. Do NOT automatically log out a user when their account is deactivated.
+2. Do NOT redirect them away from the application just because their status is inactive/deactivated.
+3. Allow the deactivated user to continue accessing:
+   - Dashboard and allowed read-only pages
+   - Leaderboard
+   - Profile page
+   - Profile editing
+   - Other non-restricted features available to their role
+
+4. For restricted collection-request-related actions:
+   - Disable or hide the relevant action buttons when the user's status is deactivated, if the current authenticated user status is available.
+   - If the backend returns a 403 because the account is deactivated, show a clear user-friendly message:
+     "Your account is currently deactivated. You cannot perform this action."
+
+5. Do not treat account deactivation as an authentication failure.
+   - Do NOT clear the authentication token.
+   - Do NOT log the user out.
+   - Do NOT redirect to the login page unless the backend actually returns a genuine authentication failure such as an invalid/expired session.
+
+6. Ensure status changes are reflected correctly after page refresh or after the user's account data is fetched again.
+
+IMPORTANT:
+Keep all existing working functionality unchanged.
+Do not change the admin deactivation UI.
+Do not redesign the application.
+Only update the frontend behavior related to how a deactivated Collector or Rider is handled.
+
+After implementation:
+1. Verify an active user can perform normal request-related actions.
+2. Verify a deactivated user can still log in.
+3. Verify a deactivated user stays logged in after the admin deactivates them.
+4. Verify a deactivated user can view the leaderboard.
+5. Verify a deactivated user can edit their profile.
+6. Verify restricted request/collection actions are blocked.
+7. Verify the user sees a clear message instead of being logged out.
+8. Run the frontend build/check and fix all errors.
